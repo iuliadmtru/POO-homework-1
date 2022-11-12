@@ -4,6 +4,7 @@ import card.minion.Minion;
 
 public class Disciple extends SpecialMinion {
     public Disciple() {
+        name = "Disciple";
         boardPlacement.setRow(0);
     }
 

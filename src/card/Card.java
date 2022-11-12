@@ -4,7 +4,7 @@ abstract public class Card {
     private int mana;
     private String description;
     private String[] colors;
-    private String name;
+    protected String name;
     private boolean frozen = false;
 
     public int getMana() {
@@ -33,10 +33,6 @@ abstract public class Card {
 
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public boolean isFrozen() {
