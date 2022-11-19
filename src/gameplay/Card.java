@@ -21,6 +21,9 @@ public class Card {
         name = cardInput.getName();
     }
 
+    public Card() {
+    }
+
     public int getMana() {
         return mana;
     }
@@ -68,4 +71,5 @@ public class Card {
     public void setName(final String name) {
         this.name = name;
     }
+
 }

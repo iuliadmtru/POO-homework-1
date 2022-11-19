@@ -6,18 +6,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import checker.CheckerConstants;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import fileio.*;
-import fileio.actionsoutput.ActionOnCardOutput;
-import fileio.actionsoutput.ActionOnDeckOutput;
-import fileio.actionsoutput.ActionOnPlayerOutput;
-import fileio.actionsoutput.ActionOnStateOutput;
-import gameplay.Actions;
 import gameplay.Card;
 import gameplay.Game;
 import gameplay.Player;
+import gameplay.cards.Hero;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -79,68 +77,86 @@ public final class Main {
 
         ArrayNode output = objectMapper.createArrayNode();
 
-        Output gameOutput = new Output();
-        ArrayList<ActionsOutput> actionsOutputs = new ArrayList<ActionsOutput>();
-
-        // get players decks
+        // get players decks lists
         ArrayList<ArrayList<CardInput>> playerOneDecks = inputData.getPlayerOneDecks().getDecks();
         ArrayList<ArrayList<CardInput>> playerTwoDecks = inputData.getPlayerTwoDecks().getDecks();
-
-        // play games
+        // iterate through all games
         ArrayList<GameInput> games = inputData.getGames();
         for (GameInput game : games) {
             // set starting configuration
-            StartGameInput startGame = game.getStartGame();
-            Game gameState = new Game();
-            gameState.setPlayerTurn(startGame.getStartingPlayer());
-            // set player one hero and deck
+            StartGameInput startInput = game.getStartGame();
             Player playerOne = new Player();
-            playerOne.setHero(startGame.getPlayerOneHero());
-            playerOne.setDeck(playerOneDecks.get(startGame.getPlayerOneDeckIdx()));
-            // set player two hero and deck
             Player playerTwo = new Player();
-            playerTwo.setHero(startGame.getPlayerTwoHero());
-            playerTwo.setDeck(playerTwoDecks.get(startGame.getPlayerTwoDeckIdx()));
+            // players choose decks
+            playerOne.setDeck(playerOneDecks.get(startInput.getPlayerOneDeckIdx()));
+            playerTwo.setDeck(playerTwoDecks.get(startInput.getPlayerTwoDeckIdx()));
+            // shuffle decks
+            playerOne.shuffleDeckWithSeed(startInput.getShuffleSeed());
+            playerTwo.shuffleDeckWithSeed(startInput.getShuffleSeed());
+            // players choose heroes
+            playerOne.setHero(startInput.getPlayerOneHero());
+            playerTwo.setHero(startInput.getPlayerTwoHero());
 
-            // play the game
-            Actions doAction = new Actions();
-            doAction.setGame(gameState);
-            doAction.setPlayers(new ArrayList<Player>(Arrays.asList(playerOne, playerTwo)));
-            ArrayList<ActionsInput> actions = game.getActions();
-            for (ActionsInput action : actions) {
-                switch (action.getCommand()) {
+            // set game configuration
+            Game gameConfiguration = new Game();
+            // set starting player turn
+            gameConfiguration.setPlayerTurn(startInput.getStartingPlayer());
+            // set players
+            ArrayList<Player> players = new ArrayList<Player>();
+            players.add(playerOne);
+            players.add(playerTwo);
+            gameConfiguration.setPlayers(players);
+            // start first round
+            gameConfiguration.nextRound();
+
+            // do actions
+            for (ActionsInput actionInput : game.getActions()) {
+                // instantiate action output node
+                ObjectNode actionOutput = objectMapper.createObjectNode();
+                switch (actionInput.getCommand()) {
+                    // debug commands
                     case "getPlayerDeck":
-                        ActionOnDeckOutput getPlayerDeckOutput = new ActionOnDeckOutput();
-                        getPlayerDeckOutput.setCommand("getPlayerDeck");
-                        ArrayList<Card> deck = doAction.getPlayerDeck(action.getPlayerIdx());
+                        Player playerWithDeck = gameConfiguration.getPlayers().get(actionInput.getPlayerIdx() - 1);
+                        ArrayList<Card> playerDeck = playerWithDeck.getDeck();
                         // store output
-                        ArrayList<ActionOnCardOutput> actionOnDeckOutput = new ArrayList<ActionOnCardOutput>();
-                        for (Card card : deck) {
-                            actionOnDeckOutput.add(new ActionOnCardOutput(card));
-                        }
-                        getPlayerDeckOutput.setCardOutputs(actionOnDeckOutput);
-                        actionsOutputs.add(getPlayerDeckOutput);
+                        actionOutput.put("command", "getPlayerDeck");
+                        actionOutput.put("playerIdx", actionInput.getPlayerIdx());
+                        ArrayNode cardArray = objectMapper.valueToTree(playerDeck);
+                        actionOutput.set("output", cardArray);
                         break;
                     case "getPlayerHero":
-                        ActionOnPlayerOutput getPlayerHeroOutput = new ActionOnPlayerOutput();
-                        getPlayerHeroOutput.setCommand("getPlayerHero");
-                        Card hero = doAction.getPlayerHero(action.getPlayerIdx());
+                        Player playerWithHero = gameConfiguration.getPlayers().get(actionInput.getPlayerIdx() - 1);
+                        Hero playerHero = playerWithHero.getHero();
                         // store output
-                        getPlayerHeroOutput.setOutput(new ActionOnCardOutput(hero));
-                        actionsOutputs.add(getPlayerHeroOutput);
+                        actionOutput.put("command", "getPlayerHero");
+                        actionOutput.put("playerIdx", actionInput.getPlayerIdx());
+                        ObjectNode heroNode = objectMapper.valueToTree(playerHero);
+                        actionOutput.set("output", heroNode);
                         break;
                     case "getPlayerTurn":
-                        ActionOnStateOutput getPlayerTurnOutput = new ActionOnStateOutput();
-                        getPlayerTurnOutput.setCommand("getPlayerTurn");
-                        getPlayerTurnOutput.setState(gameState.getPlayerTurn());
+                        int playerTurn = gameConfiguration.getPlayerTurn();
                         // store output
-                        actionsOutputs.add(getPlayerTurnOutput);
+                        actionOutput.put("command", "getPlayerTurn");
+                        actionOutput.put("output", playerTurn);
+                        break;
+                    case "getCardsInHand":
+                    case "getCardsOnTable":
+                    case "getCardAtPosition":
+                    case "getPlayerMana":
+                    case "getEnvironmentCardsInHand":
+                    case "getFrozenCardsOnTable":
+                        break;
+                    // game commands
+                    case "endPlayerTurn":
+                        gameConfiguration.nextTurn();
+                        break;
+                    case "placeCard":
                         break;
                 }
+                // add the action output to the final output
+                output.add(actionOutput);
             }
         }
-
-        output.addAll(output);
 
         ObjectWriter objectWriter = objectMapper.writerWithDefaultPrettyPrinter();
         objectWriter.writeValue(new File(filePath2), output);
