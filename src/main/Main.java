@@ -6,13 +6,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import checker.CheckerConstants;
-import fileio.Input;
+import fileio.*;
+import fileio.actionsoutput.ActionOnCardOutput;
+import fileio.actionsoutput.ActionOnDeckOutput;
+import fileio.actionsoutput.ActionOnPlayerOutput;
+import fileio.actionsoutput.ActionOnStateOutput;
+import gameplay.Actions;
+import gameplay.Card;
+import gameplay.Game;
+import gameplay.Player;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -69,7 +79,68 @@ public final class Main {
 
         ArrayNode output = objectMapper.createArrayNode();
 
-        //TODO add here the entry point to your implementation
+        Output gameOutput = new Output();
+        ArrayList<ActionsOutput> actionsOutputs = new ArrayList<ActionsOutput>();
+
+        // get players decks
+        ArrayList<ArrayList<CardInput>> playerOneDecks = inputData.getPlayerOneDecks().getDecks();
+        ArrayList<ArrayList<CardInput>> playerTwoDecks = inputData.getPlayerTwoDecks().getDecks();
+
+        // play games
+        ArrayList<GameInput> games = inputData.getGames();
+        for (GameInput game : games) {
+            // set starting configuration
+            StartGameInput startGame = game.getStartGame();
+            Game gameState = new Game();
+            gameState.setPlayerTurn(startGame.getStartingPlayer());
+            // set player one hero and deck
+            Player playerOne = new Player();
+            playerOne.setHero(startGame.getPlayerOneHero());
+            playerOne.setDeck(playerOneDecks.get(startGame.getPlayerOneDeckIdx()));
+            // set player two hero and deck
+            Player playerTwo = new Player();
+            playerTwo.setHero(startGame.getPlayerTwoHero());
+            playerTwo.setDeck(playerTwoDecks.get(startGame.getPlayerTwoDeckIdx()));
+
+            // play the game
+            Actions doAction = new Actions();
+            doAction.setGame(gameState);
+            doAction.setPlayers(new ArrayList<Player>(Arrays.asList(playerOne, playerTwo)));
+            ArrayList<ActionsInput> actions = game.getActions();
+            for (ActionsInput action : actions) {
+                switch (action.getCommand()) {
+                    case "getPlayerDeck":
+                        ActionOnDeckOutput getPlayerDeckOutput = new ActionOnDeckOutput();
+                        getPlayerDeckOutput.setCommand("getPlayerDeck");
+                        ArrayList<Card> deck = doAction.getPlayerDeck(action.getPlayerIdx());
+                        // store output
+                        ArrayList<ActionOnCardOutput> actionOnDeckOutput = new ArrayList<ActionOnCardOutput>();
+                        for (Card card : deck) {
+                            actionOnDeckOutput.add(new ActionOnCardOutput(card));
+                        }
+                        getPlayerDeckOutput.setCardOutputs(actionOnDeckOutput);
+                        actionsOutputs.add(getPlayerDeckOutput);
+                        break;
+                    case "getPlayerHero":
+                        ActionOnPlayerOutput getPlayerHeroOutput = new ActionOnPlayerOutput();
+                        getPlayerHeroOutput.setCommand("getPlayerHero");
+                        Card hero = doAction.getPlayerHero(action.getPlayerIdx());
+                        // store output
+                        getPlayerHeroOutput.setOutput(new ActionOnCardOutput(hero));
+                        actionsOutputs.add(getPlayerHeroOutput);
+                        break;
+                    case "getPlayerTurn":
+                        ActionOnStateOutput getPlayerTurnOutput = new ActionOnStateOutput();
+                        getPlayerTurnOutput.setCommand("getPlayerTurn");
+                        getPlayerTurnOutput.setState(gameState.getPlayerTurn());
+                        // store output
+                        actionsOutputs.add(getPlayerTurnOutput);
+                        break;
+                }
+            }
+        }
+
+        output.addAll(output);
 
         ObjectWriter objectWriter = objectMapper.writerWithDefaultPrettyPrinter();
         objectWriter.writeValue(new File(filePath2), output);
