@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import checker.CheckerConstants;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import fileio.*;
+import gameplay.Board;
 import gameplay.Card;
 import gameplay.Game;
 import gameplay.Player;
@@ -86,7 +87,9 @@ public final class Main {
             // set starting configuration
             StartGameInput startInput = game.getStartGame();
             Player playerOne = new Player();
+            playerOne.setPlayerIdx(1);
             Player playerTwo = new Player();
+            playerTwo.setPlayerIdx(2);
             // players choose decks
             playerOne.setDeck(playerOneDecks.get(startInput.getPlayerOneDeckIdx()));
             playerTwo.setDeck(playerTwoDecks.get(startInput.getPlayerTwoDeckIdx()));
@@ -99,6 +102,8 @@ public final class Main {
 
             // set game configuration
             Game gameConfiguration = new Game();
+            // set empty board
+            gameConfiguration.setGameBoard(new Board());
             // set starting player turn
             gameConfiguration.setPlayerTurn(startInput.getStartingPlayer());
             // set players
@@ -123,6 +128,8 @@ public final class Main {
                         actionOutput.put("playerIdx", actionInput.getPlayerIdx());
                         ArrayNode cardArray = objectMapper.valueToTree(playerDeck);
                         actionOutput.set("output", cardArray);
+                        // add the action output to the final output
+                        output.add(actionOutput);
                         break;
                     case "getPlayerHero":
                         Player playerWithHero = gameConfiguration.getPlayers().get(actionInput.getPlayerIdx() - 1);
@@ -132,17 +139,48 @@ public final class Main {
                         actionOutput.put("playerIdx", actionInput.getPlayerIdx());
                         ObjectNode heroNode = objectMapper.valueToTree(playerHero);
                         actionOutput.set("output", heroNode);
+                        // add the action output to the final output
+                        output.add(actionOutput);
                         break;
                     case "getPlayerTurn":
                         int playerTurn = gameConfiguration.getPlayerTurn();
                         // store output
                         actionOutput.put("command", "getPlayerTurn");
                         actionOutput.put("output", playerTurn);
+                        // add the action output to the final output
+                        output.add(actionOutput);
                         break;
                     case "getCardsInHand":
-                    case "getCardsOnTable":
-                    case "getCardAtPosition":
+                        Player playerWithCards = gameConfiguration.getPlayers().get(actionInput.getPlayerIdx() - 1);
+                        ArrayList<Card> cardsInHand = playerWithCards.getCardsInHand();
+                        // store output
+                        actionOutput.put("command", "getCardsInHand");
+                        actionOutput.put("playerIdx", actionInput.getPlayerIdx());
+                        ArrayNode cardsInHandArray = objectMapper.valueToTree(cardsInHand);
+                        actionOutput.set("output", cardsInHandArray);
+                        // add the action output to the final output
+                        output.add(actionOutput);
+                        break;
                     case "getPlayerMana":
+                        Player playerWithMana = gameConfiguration.getPlayers().get(actionInput.getPlayerIdx() - 1);
+                        int playerMana = playerWithMana.getMana();
+                        actionOutput.put("command", "getPlayerMana");
+                        actionOutput.put("playerIdx", actionInput.getPlayerIdx());
+                        actionOutput.put("output", playerMana);
+                        // add the action output to the final output
+                        output.add(actionOutput);
+                        break;
+                    case "getCardsOnTable":
+                        Board gameBoard = gameConfiguration.getGameBoard();
+                        ArrayList<ArrayList<Card>> cardsOnTable = gameBoard.getCardsOnBoard();
+                        // store output
+                        actionOutput.put("command", "getCardsOnTable");
+                        ArrayNode cardsOnTableArray = objectMapper.valueToTree(cardsOnTable);
+                        actionOutput.set("output", cardsOnTableArray);
+                        // add the action output to the final output
+                        output.add(actionOutput);
+                        break;
+                    case "getCardAtPosition":
                     case "getEnvironmentCardsInHand":
                     case "getFrozenCardsOnTable":
                         break;
@@ -151,10 +189,32 @@ public final class Main {
                         gameConfiguration.nextTurn();
                         break;
                     case "placeCard":
+                        Player currentPlayer = gameConfiguration.getPlayers().get(gameConfiguration.getPlayerTurn() - 1);
+                        switch (currentPlayer.placeCard(actionInput.getHandIdx(), gameConfiguration.getGameBoard())) {
+                            case 1: // ROW_IS_FULL
+                                actionOutput.put("command", "placeCard");
+                                actionOutput.put("handIdx", actionInput.getHandIdx());
+                                actionOutput.put("error", "Cannot place card on table since row is full.");
+                                // add the action output to the final output
+                                output.add(actionOutput);
+                                break;
+                            case 2: // ENV_CARD_CANNOT_BE_PLACED
+                                actionOutput.put("command", "placeCard");
+                                actionOutput.put("handIdx", actionInput.getHandIdx());
+                                actionOutput.put("error", "Cannot place environment card on table.");
+                                // add the action output to the final output
+                                output.add(actionOutput);
+                                break;
+                            case 3: // NOT_ENOUGH_MANA
+                                actionOutput.put("command", "placeCard");
+                                actionOutput.put("handIdx", actionInput.getHandIdx());
+                                actionOutput.put("error", "Not enough mana to place card on table.");
+                                // add the action output to the final output
+                                output.add(actionOutput);
+                                break;
+                        }
                         break;
                 }
-                // add the action output to the final output
-                output.add(actionOutput);
             }
         }
 

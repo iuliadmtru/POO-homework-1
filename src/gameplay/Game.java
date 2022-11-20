@@ -9,6 +9,7 @@ public class Game {
     private int playerTurn;
     private ArrayList<Player> players;
     private Board gameBoard;
+    private int turnCount = 1;
     private int round = 1;
 
     public int getPlayerTurn() {
@@ -36,17 +37,26 @@ public class Game {
     }
 
     public void nextTurn() {
+        // change player turn
         playerTurn = playerTurn == 1 ? 2 : 1;
+        // set/reset turn counter and change round
+        if (turnCount == 1) {
+            turnCount++;
+        } else {
+            turnCount = 1;
+            this.nextRound();
+        }
     }
 
     public void nextRound() {
+        int amount = Math.min(round, 10);
         for (Player player : players) {
-            player.takeCard();
-            player.increaseManaBy(round);
+            if (!player.getDeck().isEmpty()) {
+                player.takeCard();
+            }
+            player.increaseManaBy(amount);
         }
-        if (round < 10) {
-            round++;
-        }
+        round++;
     }
 
     public void run(ActionsInput input) {

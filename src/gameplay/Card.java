@@ -4,7 +4,7 @@ import fileio.CardInput;
 
 import java.util.ArrayList;
 
-public class Card {
+public abstract class Card {
     private int mana;
     private int attackDamage;
     private int health;
@@ -72,4 +72,16 @@ public class Card {
         this.name = name;
     }
 
+    public int placeOnRow(Board board, int row) {
+        // check if row is full
+        if (board.getCardsOnBoard().get(row).size() == 5) {
+            return 1; // ROW_IS_FULL error code
+        }
+        // add the card
+        board.addCard(this, row);
+
+        return 0;
+    }
+
+    public abstract int placeOnBoardOf(Player player, Board board);
 }

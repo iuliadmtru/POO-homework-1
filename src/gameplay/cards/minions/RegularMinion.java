@@ -5,18 +5,14 @@ import gameplay.Board;
 import gameplay.Player;
 import gameplay.cards.Minion;
 
-public class Disciple extends Minion implements SpecialAbility {
-    public Disciple(CardInput cardInput) {
+public class RegularMinion extends Minion {
+    public RegularMinion(CardInput cardInput) {
         this.setMana(cardInput.getMana());
-        this.setAttackDamage(0);
+        this.setAttackDamage(cardInput.getAttackDamage());
         this.setHealth(cardInput.getHealth());
         this.setDescription(cardInput.getDescription());
         this.setColors(cardInput.getColors());
-        this.setName("Disciple");
-    }
-    // god's plan
-    public void useAbilityOn(Minion minion) {
-        minion.setHealth(minion.getHealth() + 2);
+        this.setName(cardInput.getName());
     }
 
     // place on back row
