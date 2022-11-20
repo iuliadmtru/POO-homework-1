@@ -4,6 +4,9 @@ import fileio.CardInput;
 import gameplay.cards.Environment;
 import gameplay.cards.Hero;
 import gameplay.cards.Minion;
+import gameplay.cards.environment.Firestorm;
+import gameplay.cards.environment.HeartHound;
+import gameplay.cards.environment.Winterfell;
 import gameplay.cards.minions.*;
 
 import java.util.ArrayList;
@@ -56,9 +59,13 @@ public class Player {
             switch (cardInput.getName()) {
                 // environment
                 case "Firestorm":
+                    deck.add(new Firestorm(cardInput));
+                    break;
                 case "Winterfell":
+                    deck.add(new Winterfell(cardInput));
+                    break;
                 case "Heart Hound":
-                    deck.add(new Environment(cardInput));
+                    deck.add(new HeartHound(cardInput));
                     break;
                 // minion
                 case "Goliath":
@@ -124,5 +131,14 @@ public class Player {
             cardsInHand.remove(cardIdx);
         }
         return exitCode;
+    }
+
+    public void unfreezeCards(Board board) {
+        ArrayList<ArrayList<Card>> playerCards = board.getPlayerCardsOnBoard(playerIdx);
+        for (ArrayList<Card> cardsOnRow : playerCards) {
+            for (Card card : cardsOnRow) {
+                card.setFrozen(false);
+            }
+        }
     }
 }

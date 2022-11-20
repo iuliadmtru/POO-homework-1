@@ -14,6 +14,7 @@ public class Disciple extends Minion implements SpecialAbility {
         this.setColors(cardInput.getColors());
         this.setName("Disciple");
     }
+
     // god's plan
     public void useAbilityOn(Minion minion) {
         minion.setHealth(minion.getHealth() + 2);

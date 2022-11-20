@@ -11,6 +11,7 @@ public abstract class Card {
     private String description;
     private ArrayList<String> colors;
     private String name;
+    private boolean frozen = false;
 
     public Card(CardInput cardInput) {
         mana = cardInput.getMana();
@@ -70,6 +71,14 @@ public abstract class Card {
 
     public void setName(final String name) {
         this.name = name;
+    }
+
+    public boolean isFrozen() {
+        return frozen;
+    }
+
+    public void setFrozen(boolean frozen) {
+        this.frozen = frozen;
     }
 
     public int placeOnRow(Board board, int row) {

@@ -25,11 +25,26 @@ public class Board {
         cardsOnBoard = cards;
     }
 
+    public ArrayList<ArrayList<Card>> getPlayerCardsOnBoard(int playerIdx) {
+        if (playerIdx == 1) {
+            return (ArrayList<ArrayList<Card>>) cardsOnBoard.subList(2, 3);
+        }
+        return (ArrayList<ArrayList<Card>>) cardsOnBoard.subList(0, 1);
+    }
+
     public boolean isFull(int row) {
         return cardsOnBoard.get(row).size() == 5;
     }
 
     public void addCard(Card card, int row) {
         cardsOnBoard.get(row).add(card);
+    }
+
+    public void moveCard(int fromRow, int fromCol, int toRow, int toCol) {
+        Card movedCard = cardsOnBoard.get(fromRow).get(fromCol);
+        // remove from initial position
+        cardsOnBoard.get(fromRow).remove(fromCol);
+        // place on new position
+        cardsOnBoard.get(toRow).add(movedCard);
     }
 }

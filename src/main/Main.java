@@ -230,6 +230,8 @@ public final class Main {
                         break;
                     case "useEnvironmentCard":
                         Player playerThatUsesEnv = players.get(playerTurn - 1);
+                        Environment envCard = (Environment) playerThatUsesEnv.getCardsInHand().get(handIdx);
+                        envCard.useAbilityOnRow(actionInput.getAffectedRow(), gameBoard);
                         break;
                 }
             }
