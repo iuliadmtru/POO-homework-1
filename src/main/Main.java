@@ -12,6 +12,7 @@ import gameplay.Board;
 import gameplay.Card;
 import gameplay.Game;
 import gameplay.Player;
+import gameplay.cards.Environment;
 import gameplay.cards.Hero;
 
 import java.io.File;
@@ -180,8 +181,18 @@ public final class Main {
                         // add the action output to the final output
                         output.add(actionOutput);
                         break;
-                    case "getCardAtPosition":
                     case "getEnvironmentCardsInHand":
+                        Player playerWithEnvCards = gameConfiguration.getPlayers().get(gameConfiguration.getPlayerTurn() - 1);
+                        ArrayList<Environment> environmentCardsInHand = playerWithEnvCards.getEnvironmentCardsInHand();
+                        // store output
+                        actionOutput.put("command", "getEnvironmentCardsInHand");
+                        actionOutput.put("playerIdx", actionInput.getPlayerIdx());
+                        ArrayNode environmentCardsArray = objectMapper.valueToTree(environmentCardsInHand);
+                        actionOutput.set("output", environmentCardsArray);
+                        // add the action output to the final output
+                        output.add(actionOutput);
+                        break;
+                    case "getCardAtPosition":
                     case "getFrozenCardsOnTable":
                         break;
                     // game commands

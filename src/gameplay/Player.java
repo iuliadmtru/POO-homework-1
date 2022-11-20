@@ -93,6 +93,16 @@ public class Player {
         return cardsInHand;
     }
 
+    public ArrayList<Environment> getEnvironmentCardsInHand() {
+        ArrayList<Environment> environmentCards = new ArrayList<Environment>();
+        for (Card card : deck) {
+            if (card instanceof Environment) {
+                environmentCards.add((Environment) card);
+            }
+        }
+        return environmentCards;
+    }
+
     public void takeCard() {
         cardsInHand.add(deck.get(0));
         deck.remove(0);
