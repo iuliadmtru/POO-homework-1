@@ -23,6 +23,8 @@ public class Firestorm extends Environment {
                 card.setHealth(card.getHealth() - 1);
             }
         }
+        // remove dead cards
+        board.removeDeadCards(rowIdx);
         return 0;
     }
 }

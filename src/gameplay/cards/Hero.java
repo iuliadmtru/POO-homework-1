@@ -6,7 +6,7 @@ import gameplay.Board;
 import gameplay.Card;
 import gameplay.Player;
 
-@JsonIgnoreProperties({"attackDamage"})
+@JsonIgnoreProperties({"attackDamage", "frozen"})
 public class Hero extends Card {
     public Hero(CardInput cardInput) {
         this.setMana(cardInput.getMana());

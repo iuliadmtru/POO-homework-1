@@ -6,7 +6,7 @@ import gameplay.Board;
 import gameplay.Card;
 import gameplay.Player;
 
-@JsonIgnoreProperties({"attackDamage", "health"})
+@JsonIgnoreProperties({"attackDamage", "health", "frozen"})
 public abstract class Environment extends Card {
     public Environment(CardInput cardInput) {
         this.setMana(cardInput.getMana());

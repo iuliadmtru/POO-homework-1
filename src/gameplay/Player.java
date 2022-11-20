@@ -58,36 +58,17 @@ public class Player {
             // convert cards to their corresponding type
             switch (cardInput.getName()) {
                 // environment
-                case "Firestorm":
-                    deck.add(new Firestorm(cardInput));
-                    break;
-                case "Winterfell":
-                    deck.add(new Winterfell(cardInput));
-                    break;
-                case "Heart Hound":
-                    deck.add(new HeartHound(cardInput));
-                    break;
+                case "Firestorm" -> deck.add(new Firestorm(cardInput));
+                case "Winterfell" -> deck.add(new Winterfell(cardInput));
+                case "Heart Hound" -> deck.add(new HeartHound(cardInput));
+
                 // minion
-                case "Goliath":
-                case "Warden":
-                    deck.add(new Tank(cardInput));
-                    break;
-                case "Sentinel":
-                case "Berserker":
-                    deck.add(new RegularMinion(cardInput));
-                    break;
-                case "Miraj":
-                    deck.add(new Miraj(cardInput));
-                    break;
-                case "The Ripper":
-                    deck.add(new TheRipper(cardInput));
-                    break;
-                case "Disciple":
-                    deck.add(new Disciple(cardInput));
-                    break;
-                case "The Cursed One":
-                    deck.add(new TheCursedOne(cardInput));
-                    break;
+                case "Goliath", "Warden" -> deck.add(new Tank(cardInput));
+                case "Sentinel", "Berserker" -> deck.add(new RegularMinion(cardInput));
+                case "Miraj" -> deck.add(new Miraj(cardInput));
+                case "The Ripper" -> deck.add(new TheRipper(cardInput));
+                case "Disciple" -> deck.add(new Disciple(cardInput));
+                case "The Cursed One" -> deck.add(new TheCursedOne(cardInput));
             }
         }
     }
@@ -102,7 +83,7 @@ public class Player {
 
     public ArrayList<Environment> getEnvironmentCardsInHand() {
         ArrayList<Environment> environmentCards = new ArrayList<Environment>();
-        for (Card card : deck) {
+        for (Card card : cardsInHand) {
             if (card instanceof Environment) {
                 environmentCards.add((Environment) card);
             }
@@ -116,9 +97,9 @@ public class Player {
     }
 
     public int placeCard(int cardIdx, Board board) {
-        if (cardIdx >= cardsInHand.size()) {
-            return 0;
-        }
+//        if (cardIdx >= cardsInHand.size()) {
+//            return 0;
+//        }
         // get the card from the player's hand
         Card card = cardsInHand.get(cardIdx);
         if (card.getMana() > mana) {
@@ -154,9 +135,17 @@ public class Player {
         if (card.getMana() > mana) {
             return 4; // NOT_ENOUGH_MANA_ENV error code
         }
-        if (!this.hasRow(rowIdx)) {
+        if (this.hasRow(rowIdx)) {
             return 5;
         }
-        return card.useAbilityOnRow(rowIdx, board);
+        // use card ability
+        int exitCode = card.useAbilityOnRow(rowIdx, board);
+        // if successful remove card from hand and decrease mana
+        if (exitCode == 0) {
+            cardsInHand.remove(card);
+            // decrease mana
+            decreaseManaBy(card.getMana());
+        }
+        return exitCode;
     }
 }

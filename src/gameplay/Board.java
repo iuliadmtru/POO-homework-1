@@ -26,10 +26,15 @@ public class Board {
     }
 
     public ArrayList<ArrayList<Card>> getPlayerCardsOnBoard(int playerIdx) {
+        ArrayList<ArrayList<Card>> playerCards = new ArrayList<>();
         if (playerIdx == 1) {
-            return (ArrayList<ArrayList<Card>>) cardsOnBoard.subList(2, 3);
+            playerCards.add(cardsOnBoard.get(2));
+            playerCards.add(cardsOnBoard.get(3));
+        } else {
+            playerCards.add(cardsOnBoard.get(0));
+            playerCards.add(cardsOnBoard.get(1));
         }
-        return (ArrayList<ArrayList<Card>>) cardsOnBoard.subList(0, 1);
+        return playerCards;
     }
 
     public boolean isFull(int row) {
@@ -46,5 +51,38 @@ public class Board {
         cardsOnBoard.get(fromRow).remove(fromCol);
         // place on new position
         cardsOnBoard.get(toRow).add(movedCard);
+    }
+
+    public void removeCard(Card card, int fromRow) {
+        cardsOnBoard.get(fromRow).remove(card);
+    }
+
+    public void removeDeadCards(int rowIdx) {
+        ArrayList<Card> removedCards = new ArrayList<>();
+        for (Card card : cardsOnBoard.get(rowIdx)) {
+            if (card.getHealth() == 0) {
+                removedCards.add(card);
+            }
+        }
+        // remove the cards from the board
+        for (Card card : removedCards) {
+            removeCard(card, rowIdx);
+        }
+    }
+
+    public Card getCardAtPosition(int rowIdx, int colIdx) {
+        return cardsOnBoard.get(rowIdx).get(colIdx);
+    }
+
+    public ArrayList<Card> getFrozenCards() {
+        ArrayList<Card> frozenCards = new ArrayList<>();
+        for (ArrayList<Card> cardsOnRow : cardsOnBoard) {
+            for (Card card : cardsOnRow) {
+                if (card.isFrozen()) {
+                    frozenCards.add(card);
+                }
+            }
+        }
+        return frozenCards;
     }
 }

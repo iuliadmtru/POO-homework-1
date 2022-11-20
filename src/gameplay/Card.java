@@ -1,9 +1,11 @@
 package gameplay;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import fileio.CardInput;
 
 import java.util.ArrayList;
 
+@JsonIgnoreProperties({"frozen"})
 public abstract class Card {
     private int mana;
     private int attackDamage;

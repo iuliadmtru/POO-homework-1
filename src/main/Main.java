@@ -124,6 +124,8 @@ public final class Main {
                 int playerIdx = actionInput.getPlayerIdx();
                 int handIdx = actionInput.getHandIdx();
                 int affectedRow = actionInput.getAffectedRow();
+                int x = actionInput.getX();
+                int y = actionInput.getY();
                 Board gameBoard = gameConfiguration.getGameBoard();
                 switch (actionInput.getCommand()) {
                     // debug commands
@@ -197,7 +199,24 @@ public final class Main {
                         output.add(actionOutput);
                         break;
                     case "getCardAtPosition":
+                        Card cardAtPosition = gameBoard.getCardAtPosition(x, y);
+                        // store output
+                        actionOutput.put("command", "getCardAtPosition");
+                        actionOutput.put("x", x);
+                        actionOutput.put("y", y);
+                        ObjectNode cardAtPositionNode = objectMapper.valueToTree(cardAtPosition);
+                        actionOutput.set("output", cardAtPositionNode);
+                        // add the action output to the final output
+                        output.add(actionOutput);
+                        break;
                     case "getFrozenCardsOnTable":
+                        ArrayList<Card> frozenCardsOnTable = gameBoard.getFrozenCards();
+                        // store output
+                        actionOutput.put("command", "getFrozenCardsOnTable");
+                        ArrayNode frozenCardsOnTableArray = objectMapper.valueToTree(frozenCardsOnTable);
+                        actionOutput.set("output", frozenCardsOnTableArray);
+                        // add the action output to the final output
+                        output.add(actionOutput);
                         break;
                     // game commands
                     case "endPlayerTurn":
@@ -235,6 +254,7 @@ public final class Main {
                         // check if chosen card is of type environment
                         if (!(chosenCard instanceof Environment)) {
                             actionOutput.put("command", "useEnvironmentCard");
+                            actionOutput.put("handIdx", handIdx);
                             actionOutput.put("affectedRow", affectedRow);
                             actionOutput.put("error", "Chosen card is not of type environment.");
                             // add the action output to the final output
@@ -244,6 +264,7 @@ public final class Main {
                         switch (playerThatUsesEnv.useEnvironmentCard((Environment) chosenCard, affectedRow, gameBoard)) {
                             case 4 -> {
                                 actionOutput.put("command", "useEnvironmentCard");
+                                actionOutput.put("handIdx", handIdx);
                                 actionOutput.put("affectedRow", affectedRow);
                                 actionOutput.put("error", "Not enough mana to use environment card.");
                                 // add the action output to the final output
@@ -251,6 +272,7 @@ public final class Main {
                             }
                             case 5 -> {
                                 actionOutput.put("command", "useEnvironmentCard");
+                                actionOutput.put("handIdx", handIdx);
                                 actionOutput.put("affectedRow", affectedRow);
                                 actionOutput.put("error", "Chosen row does not belong to the enemy.");
                                 // add the action output to the final output
@@ -258,6 +280,7 @@ public final class Main {
                             }
                             case 6 -> {
                                 actionOutput.put("command", "useEnvironmentCard");
+                                actionOutput.put("handIdx", handIdx);
                                 actionOutput.put("affectedRow", affectedRow);
                                 actionOutput.put("error", "Cannot steal enemy card since the player's row is full.");
                                 // add the action output to the final output
