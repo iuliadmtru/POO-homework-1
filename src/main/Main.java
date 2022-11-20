@@ -14,6 +14,8 @@ import gameplay.Game;
 import gameplay.Player;
 import gameplay.cards.Environment;
 import gameplay.cards.Hero;
+import gameplay.cards.Minion;
+import gameplay.cards.minions.Tank;
 
 import java.io.File;
 import java.io.IOException;
@@ -121,11 +123,14 @@ public final class Main {
                 ObjectNode actionOutput = objectMapper.createObjectNode();
                 // get action configuration
                 int playerTurn = gameConfiguration.getPlayerTurn();
+                Player currentPlayer = players.get(playerTurn - 1);
                 int playerIdx = actionInput.getPlayerIdx();
                 int handIdx = actionInput.getHandIdx();
                 int affectedRow = actionInput.getAffectedRow();
                 int x = actionInput.getX();
                 int y = actionInput.getY();
+                Coordinates cardAttacker = actionInput.getCardAttacker();
+                Coordinates cardAttacked = actionInput.getCardAttacked();
                 Board gameBoard = gameConfiguration.getGameBoard();
                 switch (actionInput.getCommand()) {
                     // debug commands
@@ -223,8 +228,7 @@ public final class Main {
                         gameConfiguration.nextTurn();
                         break;
                     case "placeCard":
-                        Player playerThatPlacesCard = players.get(playerTurn - 1);
-                        switch (playerThatPlacesCard.placeCard(handIdx, gameBoard)) {
+                        switch (currentPlayer.placeCard(handIdx, gameBoard)) {
                             case 1 -> { // ROW_IS_FULL
                                 actionOutput.put("command", "placeCard");
                                 actionOutput.put("handIdx", handIdx);
@@ -249,8 +253,7 @@ public final class Main {
                         }
                         break;
                     case "useEnvironmentCard":
-                        Player playerThatUsesEnv = players.get(playerTurn - 1);
-                        Card chosenCard = playerThatUsesEnv.getCardsInHand().get(handIdx);
+                        Card chosenCard = currentPlayer.getCardsInHand().get(handIdx);
                         // check if chosen card is of type environment
                         if (!(chosenCard instanceof Environment)) {
                             actionOutput.put("command", "useEnvironmentCard");
@@ -261,7 +264,7 @@ public final class Main {
                             output.add(actionOutput);
                             break;
                         }
-                        switch (playerThatUsesEnv.useEnvironmentCard((Environment) chosenCard, affectedRow, gameBoard)) {
+                        switch (currentPlayer.useEnvironmentCard((Environment) chosenCard, affectedRow, gameBoard)) {
                             case 4 -> {
                                 actionOutput.put("command", "useEnvironmentCard");
                                 actionOutput.put("handIdx", handIdx);
@@ -286,6 +289,58 @@ public final class Main {
                                 // add the action output to the final output
                                 output.add(actionOutput);
                             }
+                        }
+                        break;
+                    case "cardUsesAttack":
+                        // check if the attacked card belongs to the attacker
+                        if (currentPlayer.hasRow(cardAttacked.getX())) {
+                            actionOutput.put("command", "cardUsesAttack");
+                            actionOutput.set("cardAttacker", objectMapper.valueToTree(cardAttacker));
+                            actionOutput.set("cardAttacked", objectMapper.valueToTree(cardAttacked));
+                            actionOutput.put("error", "Attacked card does not belong to the enemy.");
+                            // add the action output to the final output
+                            output.add(actionOutput);
+                            break;
+                        }
+                        // get attacker card
+                        Minion attacker = (Minion) gameBoard.getCardAtPosition(cardAttacker.getX(), cardAttacker.getY());
+                        // check if the card has already attacked
+                        if (attacker.hasAttacked()) {
+                            actionOutput.put("command", "cardUsesAttack");
+                            actionOutput.set("cardAttacker", objectMapper.valueToTree(cardAttacker));
+                            actionOutput.set("cardAttacked", objectMapper.valueToTree(cardAttacked));
+                            actionOutput.put("error", "Attacker card has already attacked this turn.");
+                            // add the action output to the final output
+                            output.add(actionOutput);
+                            break;
+                        }
+                        // check if the attacker card is frozen
+                        if (attacker.isFrozen()) {
+                            actionOutput.put("command", "cardUsesAttack");
+                            actionOutput.set("cardAttacker", objectMapper.valueToTree(cardAttacker));
+                            actionOutput.set("cardAttacked", objectMapper.valueToTree(cardAttacked));
+                            actionOutput.put("error", "Attacker card is frozen.");
+                            // add the action output to the final output
+                            output.add(actionOutput);
+                            break;
+                        }
+                        // get attacked card
+                        Card attacked = gameBoard.getCardAtPosition(cardAttacked.getX(), cardAttacked.getY());
+                        // check if attacked card is a Tank, if necessary
+                        Player attackedPlayer = gameConfiguration.getOtherPlayer();
+                        if (attackedPlayer.hasTanksOnBoard(gameBoard) && !(attacked instanceof Tank)) {
+                            actionOutput.put("command", "cardUsesAttack");
+                            actionOutput.set("cardAttacker", objectMapper.valueToTree(cardAttacker));
+                            actionOutput.set("cardAttacked", objectMapper.valueToTree(cardAttacked));
+                            actionOutput.put("error", "Attacked card is not of type 'Tank'.");
+                            // add the action output to the final output
+                            output.add(actionOutput);
+                            break;
+                        }
+                        // use attack
+                        attacker.attack(attacked);
+                        if (attacked.getHealth() == 0) {
+                            gameBoard.removeCard(attacked);
                         }
                         break;
                 }

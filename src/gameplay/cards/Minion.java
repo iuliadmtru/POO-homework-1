@@ -3,7 +3,9 @@ package gameplay.cards;
 import fileio.CardInput;
 import gameplay.Card;
 
-public abstract class Minion extends Card {
+public abstract class Minion extends Card implements FightCard {
+    private boolean attackState = false;
+
     public Minion(CardInput cardInput) {
         this.setMana(cardInput.getMana());
         this.setAttackDamage(cardInput.getAttackDamage());
@@ -14,5 +16,17 @@ public abstract class Minion extends Card {
     }
 
     public Minion() {
+    }
+
+    public boolean hasAttacked() {
+        return attackState;
+    }
+
+    public void setAttackState(boolean attackState) {
+        this.attackState = attackState;
+    }
+
+    public void attack(Card card) {
+        card.setHealth(card.getHealth() - this.getAttackDamage());
     }
 }

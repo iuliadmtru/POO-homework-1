@@ -53,6 +53,12 @@ public class Board {
         cardsOnBoard.get(toRow).add(movedCard);
     }
 
+    public void removeCard(Card card) {
+        for (int rowIdx = 0; rowIdx < 4; rowIdx++) {
+            cardsOnBoard.get(rowIdx).remove(card);
+        }
+    }
+
     public void removeCard(Card card, int fromRow) {
         cardsOnBoard.get(fromRow).remove(card);
     }

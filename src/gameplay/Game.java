@@ -1,8 +1,5 @@
 package gameplay;
 
-import fileio.ActionsInput;
-import gameplay.commands.DebugCommand;
-
 import java.util.ArrayList;
 
 public class Game {
@@ -61,20 +58,7 @@ public class Game {
         round++;
     }
 
-    public void run(ActionsInput input) {
-        switch (input.getCommand()) {
-            // debug commands
-            case "getCardsInHand":
-            case "getPlayerDeck":
-            case "getCardsOnBoard":
-            case "getPlayerTurn":
-            case "getPlayerHero":
-            case "getCardAtPosition":
-            case "getPlayerMana":
-            case "getEnvironmentCardsInHand":
-            case "getFrozenCardsOnBoard":
-                (new DebugCommand(input)).runIn(this);
-                break;
-        }
+    public Player getOtherPlayer() {
+        return players.get(playerTurn % 2);
     }
 }

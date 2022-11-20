@@ -3,6 +3,7 @@ package gameplay.cards.minions;
 import fileio.CardInput;
 import gameplay.Board;
 import gameplay.Player;
+import gameplay.cards.FightCard;
 import gameplay.cards.Minion;
 
 public class TheRipper extends Minion implements SpecialAbility {

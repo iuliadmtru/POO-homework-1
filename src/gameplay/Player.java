@@ -148,4 +148,27 @@ public class Player {
         }
         return exitCode;
     }
+
+    public boolean hasTanksOnBoard(Board board) {
+        switch (playerIdx) {
+            case 1:
+                ArrayList<Card> playerOneFrontCards = board.getCardsOnBoard().get(2);
+                for (Card card : playerOneFrontCards) {
+                    if (card instanceof Tank) {
+                        return true;
+                    }
+                }
+                return false;
+            case 2:
+                ArrayList<Card> playerTwoFrontCards = board.getCardsOnBoard().get(1);
+                for (Card card : playerTwoFrontCards) {
+                    if (card instanceof Tank) {
+                        return true;
+                    }
+                }
+                return false;
+            default:
+                return false;
+        }
+    }
 }
