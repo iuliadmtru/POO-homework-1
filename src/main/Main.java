@@ -119,32 +119,36 @@ public final class Main {
             for (ActionsInput actionInput : game.getActions()) {
                 // instantiate action output node
                 ObjectNode actionOutput = objectMapper.createObjectNode();
+                // get action configuration
+                int playerTurn = gameConfiguration.getPlayerTurn();
+                int playerIdx = actionInput.getPlayerIdx();
+                int handIdx = actionInput.getHandIdx();
+                Board gameBoard = gameConfiguration.getGameBoard();
                 switch (actionInput.getCommand()) {
                     // debug commands
                     case "getPlayerDeck":
-                        Player playerWithDeck = gameConfiguration.getPlayers().get(actionInput.getPlayerIdx() - 1);
+                        Player playerWithDeck = players.get(playerIdx - 1);
                         ArrayList<Card> playerDeck = playerWithDeck.getDeck();
                         // store output
                         actionOutput.put("command", "getPlayerDeck");
-                        actionOutput.put("playerIdx", actionInput.getPlayerIdx());
+                        actionOutput.put("playerIdx", playerIdx);
                         ArrayNode cardArray = objectMapper.valueToTree(playerDeck);
                         actionOutput.set("output", cardArray);
                         // add the action output to the final output
                         output.add(actionOutput);
                         break;
                     case "getPlayerHero":
-                        Player playerWithHero = gameConfiguration.getPlayers().get(actionInput.getPlayerIdx() - 1);
+                        Player playerWithHero = players.get(playerIdx - 1);
                         Hero playerHero = playerWithHero.getHero();
                         // store output
                         actionOutput.put("command", "getPlayerHero");
-                        actionOutput.put("playerIdx", actionInput.getPlayerIdx());
+                        actionOutput.put("playerIdx", playerIdx);
                         ObjectNode heroNode = objectMapper.valueToTree(playerHero);
                         actionOutput.set("output", heroNode);
                         // add the action output to the final output
                         output.add(actionOutput);
                         break;
                     case "getPlayerTurn":
-                        int playerTurn = gameConfiguration.getPlayerTurn();
                         // store output
                         actionOutput.put("command", "getPlayerTurn");
                         actionOutput.put("output", playerTurn);
@@ -152,27 +156,26 @@ public final class Main {
                         output.add(actionOutput);
                         break;
                     case "getCardsInHand":
-                        Player playerWithCards = gameConfiguration.getPlayers().get(actionInput.getPlayerIdx() - 1);
+                        Player playerWithCards = players.get(playerIdx - 1);
                         ArrayList<Card> cardsInHand = playerWithCards.getCardsInHand();
                         // store output
                         actionOutput.put("command", "getCardsInHand");
-                        actionOutput.put("playerIdx", actionInput.getPlayerIdx());
+                        actionOutput.put("playerIdx", playerIdx);
                         ArrayNode cardsInHandArray = objectMapper.valueToTree(cardsInHand);
                         actionOutput.set("output", cardsInHandArray);
                         // add the action output to the final output
                         output.add(actionOutput);
                         break;
                     case "getPlayerMana":
-                        Player playerWithMana = gameConfiguration.getPlayers().get(actionInput.getPlayerIdx() - 1);
+                        Player playerWithMana = players.get(playerIdx - 1);
                         int playerMana = playerWithMana.getMana();
                         actionOutput.put("command", "getPlayerMana");
-                        actionOutput.put("playerIdx", actionInput.getPlayerIdx());
+                        actionOutput.put("playerIdx", playerIdx);
                         actionOutput.put("output", playerMana);
                         // add the action output to the final output
                         output.add(actionOutput);
                         break;
                     case "getCardsOnTable":
-                        Board gameBoard = gameConfiguration.getGameBoard();
                         ArrayList<ArrayList<Card>> cardsOnTable = gameBoard.getCardsOnBoard();
                         // store output
                         actionOutput.put("command", "getCardsOnTable");
@@ -182,11 +185,11 @@ public final class Main {
                         output.add(actionOutput);
                         break;
                     case "getEnvironmentCardsInHand":
-                        Player playerWithEnvCards = gameConfiguration.getPlayers().get(gameConfiguration.getPlayerTurn() - 1);
+                        Player playerWithEnvCards = players.get(playerIdx - 1);
                         ArrayList<Environment> environmentCardsInHand = playerWithEnvCards.getEnvironmentCardsInHand();
                         // store output
                         actionOutput.put("command", "getEnvironmentCardsInHand");
-                        actionOutput.put("playerIdx", actionInput.getPlayerIdx());
+                        actionOutput.put("playerIdx", playerIdx);
                         ArrayNode environmentCardsArray = objectMapper.valueToTree(environmentCardsInHand);
                         actionOutput.set("output", environmentCardsArray);
                         // add the action output to the final output
@@ -200,30 +203,33 @@ public final class Main {
                         gameConfiguration.nextTurn();
                         break;
                     case "placeCard":
-                        Player currentPlayer = gameConfiguration.getPlayers().get(gameConfiguration.getPlayerTurn() - 1);
-                        switch (currentPlayer.placeCard(actionInput.getHandIdx(), gameConfiguration.getGameBoard())) {
+                        Player playerThatPlacesCard = players.get(playerTurn - 1);
+                        switch (playerThatPlacesCard.placeCard(handIdx, gameBoard)) {
                             case 1: // ROW_IS_FULL
                                 actionOutput.put("command", "placeCard");
-                                actionOutput.put("handIdx", actionInput.getHandIdx());
+                                actionOutput.put("handIdx", handIdx);
                                 actionOutput.put("error", "Cannot place card on table since row is full.");
                                 // add the action output to the final output
                                 output.add(actionOutput);
                                 break;
                             case 2: // ENV_CARD_CANNOT_BE_PLACED
                                 actionOutput.put("command", "placeCard");
-                                actionOutput.put("handIdx", actionInput.getHandIdx());
+                                actionOutput.put("handIdx", handIdx);
                                 actionOutput.put("error", "Cannot place environment card on table.");
                                 // add the action output to the final output
                                 output.add(actionOutput);
                                 break;
                             case 3: // NOT_ENOUGH_MANA
                                 actionOutput.put("command", "placeCard");
-                                actionOutput.put("handIdx", actionInput.getHandIdx());
+                                actionOutput.put("handIdx", handIdx);
                                 actionOutput.put("error", "Not enough mana to place card on table.");
                                 // add the action output to the final output
                                 output.add(actionOutput);
                                 break;
                         }
+                        break;
+                    case "useEnvironmentCard":
+                        Player playerThatUsesEnv = players.get(playerTurn - 1);
                         break;
                 }
             }
