@@ -4,6 +4,7 @@ import fileio.CardInput;
 import gameplay.cards.Environment;
 import gameplay.cards.Hero;
 import gameplay.cards.Minion;
+import gameplay.cards.minions.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,15 +41,25 @@ public class Player {
                     deck.add(new Environment(cardInput));
                     break;
                 // minion
-                case "Sentinel":
-                case "Berserker":
                 case "Goliath":
                 case "Warden":
-                case "Miraj":
-                case "The Ripper":
-                case "Disciple":
-                case "The Cursed One":
+                    deck.add(new Tank(cardInput));
+                    break;
+                case "Sentinel":
+                case "Berserker":
                     deck.add(new Minion(cardInput));
+                    break;
+                case "Miraj":
+                    deck.add(new Miraj(cardInput));
+                    break;
+                case "The Ripper":
+                    deck.add(new TheRipper(cardInput));
+                    break;
+                case "Disciple":
+                    deck.add(new Disciple(cardInput));
+                    break;
+                case "The Cursed One":
+                    deck.add(new TheCursedOne(cardInput));
                     break;
             }
         }
