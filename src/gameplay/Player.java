@@ -141,4 +141,22 @@ public class Player {
             }
         }
     }
+
+    public boolean hasRow(int rowIdx) {
+        return switch (playerIdx) {
+            case 1 -> (rowIdx == 2 || rowIdx == 3);
+            case 2 -> (rowIdx == 0 || rowIdx == 1);
+            default -> false;
+        };
+    }
+
+    public int useEnvironmentCard(Environment card, int rowIdx, Board board) {
+        if (card.getMana() > mana) {
+            return 4; // NOT_ENOUGH_MANA_ENV error code
+        }
+        if (!this.hasRow(rowIdx)) {
+            return 5;
+        }
+        return card.useAbilityOnRow(rowIdx, board);
+    }
 }

@@ -27,7 +27,7 @@ public class HeartHound extends Environment {
             default -> mirrorRow = -1;
         }
         if (board.isFull(mirrorRow)) {
-            return 4; // CANNOT_STEAL error code
+            return 6; // CANNOT_STEAL error code
         }
         // find opponent's minion with max health
         ArrayList<Card> cards = board.getCardsOnBoard().get(rowIdx);

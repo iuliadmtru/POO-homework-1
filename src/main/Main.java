@@ -123,6 +123,7 @@ public final class Main {
                 int playerTurn = gameConfiguration.getPlayerTurn();
                 int playerIdx = actionInput.getPlayerIdx();
                 int handIdx = actionInput.getHandIdx();
+                int affectedRow = actionInput.getAffectedRow();
                 Board gameBoard = gameConfiguration.getGameBoard();
                 switch (actionInput.getCommand()) {
                     // debug commands
@@ -205,33 +206,64 @@ public final class Main {
                     case "placeCard":
                         Player playerThatPlacesCard = players.get(playerTurn - 1);
                         switch (playerThatPlacesCard.placeCard(handIdx, gameBoard)) {
-                            case 1: // ROW_IS_FULL
+                            case 1 -> { // ROW_IS_FULL
                                 actionOutput.put("command", "placeCard");
                                 actionOutput.put("handIdx", handIdx);
                                 actionOutput.put("error", "Cannot place card on table since row is full.");
                                 // add the action output to the final output
                                 output.add(actionOutput);
-                                break;
-                            case 2: // ENV_CARD_CANNOT_BE_PLACED
+                            }
+                            case 2 -> { // ENV_CARD_CANNOT_BE_PLACED
                                 actionOutput.put("command", "placeCard");
                                 actionOutput.put("handIdx", handIdx);
                                 actionOutput.put("error", "Cannot place environment card on table.");
                                 // add the action output to the final output
                                 output.add(actionOutput);
-                                break;
-                            case 3: // NOT_ENOUGH_MANA
+                            }
+                            case 3 -> { // NOT_ENOUGH_MANA
                                 actionOutput.put("command", "placeCard");
                                 actionOutput.put("handIdx", handIdx);
                                 actionOutput.put("error", "Not enough mana to place card on table.");
                                 // add the action output to the final output
                                 output.add(actionOutput);
-                                break;
+                            }
                         }
                         break;
                     case "useEnvironmentCard":
                         Player playerThatUsesEnv = players.get(playerTurn - 1);
-                        Environment envCard = (Environment) playerThatUsesEnv.getCardsInHand().get(handIdx);
-                        envCard.useAbilityOnRow(actionInput.getAffectedRow(), gameBoard);
+                        Card chosenCard = playerThatUsesEnv.getCardsInHand().get(handIdx);
+                        // check if chosen card is of type environment
+                        if (!(chosenCard instanceof Environment)) {
+                            actionOutput.put("command", "useEnvironmentCard");
+                            actionOutput.put("affectedRow", affectedRow);
+                            actionOutput.put("error", "Chosen card is not of type environment.");
+                            // add the action output to the final output
+                            output.add(actionOutput);
+                            break;
+                        }
+                        switch (playerThatUsesEnv.useEnvironmentCard((Environment) chosenCard, affectedRow, gameBoard)) {
+                            case 4 -> {
+                                actionOutput.put("command", "useEnvironmentCard");
+                                actionOutput.put("affectedRow", affectedRow);
+                                actionOutput.put("error", "Not enough mana to use environment card.");
+                                // add the action output to the final output
+                                output.add(actionOutput);
+                            }
+                            case 5 -> {
+                                actionOutput.put("command", "useEnvironmentCard");
+                                actionOutput.put("affectedRow", affectedRow);
+                                actionOutput.put("error", "Chosen row does not belong to the enemy.");
+                                // add the action output to the final output
+                                output.add(actionOutput);
+                            }
+                            case 6 -> {
+                                actionOutput.put("command", "useEnvironmentCard");
+                                actionOutput.put("affectedRow", affectedRow);
+                                actionOutput.put("error", "Cannot steal enemy card since the player's row is full.");
+                                // add the action output to the final output
+                                output.add(actionOutput);
+                            }
+                        }
                         break;
                 }
             }
