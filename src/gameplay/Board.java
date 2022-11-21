@@ -6,7 +6,7 @@ public class Board {
     private ArrayList<ArrayList<Card>> cardsOnBoard;
 
     public Board() {
-        cardsOnBoard = new ArrayList<ArrayList<Card>>();
+        cardsOnBoard = new ArrayList<>();
         ArrayList<Card> rowZeroCards = new ArrayList<Card>();
         cardsOnBoard.add(rowZeroCards);
         ArrayList<Card> rowOneCards = new ArrayList<Card>();
@@ -74,6 +74,16 @@ public class Board {
         for (Card card : removedCards) {
             removeCard(card, rowIdx);
         }
+    }
+
+    public boolean hasCardAtPosition(int rowIdx, int colIdx) {
+        if (cardsOnBoard.get(rowIdx).isEmpty()) {
+            return false;
+        }
+        if (cardsOnBoard.get(rowIdx).size() <= colIdx) {
+            return false;
+        }
+        return true;
     }
 
     public Card getCardAtPosition(int rowIdx, int colIdx) {

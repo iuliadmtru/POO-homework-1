@@ -34,8 +34,11 @@ public class Game {
     }
 
     public void nextTurn() {
+        Player currentPlayer = players.get(playerTurn - 1);
         // unfreeze cards
-        players.get(playerTurn - 1).unfreezeCards(gameBoard);
+        currentPlayer.unfreezeCards(gameBoard);
+        // change attack state of cards on board
+        currentPlayer.resetAttackStateOfCards(gameBoard);
         // change player turn
         playerTurn = playerTurn == 1 ? 2 : 1;
         // set/reset turn counter and change round

@@ -26,7 +26,12 @@ public abstract class Minion extends Card implements FightCard {
         this.attackState = attackState;
     }
 
+    public void resetAttackState() {
+        attackState = false;
+    }
+
     public void attack(Card card) {
         card.setHealth(card.getHealth() - this.getAttackDamage());
+        this.setAttackState(true);
     }
 }

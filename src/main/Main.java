@@ -204,6 +204,16 @@ public final class Main {
                         output.add(actionOutput);
                         break;
                     case "getCardAtPosition":
+                        // check if there is a card at given position
+                        if (!gameBoard.hasCardAtPosition(x, y)) {
+                            actionOutput.put("command", "getCardAtPosition");
+                            actionOutput.put("x", x);
+                            actionOutput.put("y", y);
+                            actionOutput.put("output", "No card available at that position.");
+                            // add the action output to the final output
+                            output.add(actionOutput);
+                            break;
+                        }
                         Card cardAtPosition = gameBoard.getCardAtPosition(x, y);
                         // store output
                         actionOutput.put("command", "getCardAtPosition");
@@ -342,6 +352,8 @@ public final class Main {
                         if (attacked.getHealth() == 0) {
                             gameBoard.removeCard(attacked);
                         }
+                        break;
+                    case "cardUsesAbility":
                         break;
                 }
             }

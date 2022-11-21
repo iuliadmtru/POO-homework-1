@@ -171,4 +171,25 @@ public class Player {
                 return false;
         }
     }
+
+    public void resetAttackStateOfCards(Board board) {
+        switch (playerIdx) {
+            case 1:
+                for (int rowIdx = 2; rowIdx <=3; rowIdx++) {
+                    for (Card card : board.getCardsOnBoard().get(rowIdx)) {
+                        if (card instanceof Minion) {
+                            ((Minion) card).resetAttackState();
+                        }
+                    }
+                }
+            case 2:
+                for (int rowIdx = 0; rowIdx <=1; rowIdx++) {
+                    for (Card card : board.getCardsOnBoard().get(rowIdx)) {
+                        if (card instanceof Minion) {
+                            ((Minion) card).resetAttackState();
+                        }
+                    }
+                }
+        }
+    }
 }
