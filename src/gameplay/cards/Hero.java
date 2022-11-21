@@ -7,7 +7,9 @@ import gameplay.Card;
 import gameplay.Player;
 
 @JsonIgnoreProperties({"attackDamage", "frozen"})
-public class Hero extends Card implements FightCard {
+public abstract class Hero extends Card {
+    private boolean attackState = false;
+
     public Hero(CardInput cardInput) {
         this.setMana(cardInput.getMana());
         this.setHealth(30);
@@ -16,12 +18,22 @@ public class Hero extends Card implements FightCard {
         this.setName(cardInput.getName());
     }
 
+    public boolean hasAttacked() {
+        return attackState;
+    }
+
+    public void setAttackState(boolean attackState) {
+        this.attackState = attackState;
+    }
+
+    public void resetAttackState() {
+        attackState = false;
+    }
+
+    public abstract void useAbility(Board board, int rowIdx);
+
     // hero cards are not placed on the board
     public int placeOnBoardOf(Player player, Board board) {
         return 0;
-    }
-
-    public void attack(Card card) {
-
     }
 }

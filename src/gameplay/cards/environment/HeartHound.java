@@ -37,6 +37,7 @@ public class HeartHound extends Environment {
             Card card = cards.get(i);
             if (card instanceof Minion && card.getHealth() > maxHealth) {
                 stolenMinionCol = i;
+                maxHealth = card.getHealth();
             }
         }
         // place stolen minion on board

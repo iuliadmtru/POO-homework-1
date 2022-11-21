@@ -3,7 +3,7 @@ package gameplay.cards;
 import fileio.CardInput;
 import gameplay.Card;
 
-public abstract class Minion extends Card implements FightCard {
+public abstract class Minion extends Card {
     private boolean attackState = false;
 
     public Minion(CardInput cardInput) {

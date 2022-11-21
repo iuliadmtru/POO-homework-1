@@ -7,6 +7,10 @@ import gameplay.cards.Minion;
 import gameplay.cards.environment.Firestorm;
 import gameplay.cards.environment.HeartHound;
 import gameplay.cards.environment.Winterfell;
+import gameplay.cards.heroes.EmpressThorina;
+import gameplay.cards.heroes.GeneralKocioraw;
+import gameplay.cards.heroes.KingMudface;
+import gameplay.cards.heroes.LordRoyce;
 import gameplay.cards.minions.*;
 
 import java.util.ArrayList;
@@ -45,7 +49,12 @@ public class Player {
     }
 
     public void setHero(CardInput heroInput) {
-        hero = new Hero(heroInput);
+        switch (heroInput.getName()) {
+            case "Lord Royce" -> hero = new LordRoyce(heroInput);
+            case "Empress Thorina" -> hero = new EmpressThorina(heroInput);
+            case "King Mudface" -> hero = new KingMudface(heroInput);
+            case "General Kocioraw" -> hero = new GeneralKocioraw(heroInput);
+        }
     }
 
     public ArrayList<Card> getDeck() {

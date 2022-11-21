@@ -86,7 +86,7 @@ public final class Main {
         ArrayList<ArrayList<CardInput>> playerTwoDecks = inputData.getPlayerTwoDecks().getDecks();
         // iterate through all games
         ArrayList<GameInput> games = inputData.getGames();
-        for (GameInput game : games) {
+        gameLoop: for (GameInput game : games) {
             // set starting configuration
             StartGameInput startInput = game.getStartGame();
             Player playerOne = new Player();
@@ -413,6 +413,51 @@ public final class Main {
                         abilityAttacker.useAbilityOn((Minion) abilityAttacked);
                         if (abilityAttacked.getHealth() <= 0) {
                             gameBoard.removeCard(abilityAttacked);
+                        }
+                        break;
+                    case "useAttackHero":
+                        // get attacker card
+                        Minion heroAttacker = (Minion) gameBoard.getCardAtPosition(cardAttacker.getX(), cardAttacker.getY());
+                        // check if the card has already attacked
+                        if (heroAttacker.hasAttacked()) {
+                            actionOutput.put("command", "useAttackHero");
+                            actionOutput.set("cardAttacker", objectMapper.valueToTree(cardAttacker));
+                            actionOutput.put("error", "Attacker card has already attacked this turn.");
+                            // add the action output to the final output
+                            output.add(actionOutput);
+                            break;
+                        }
+                        // check if the attacker card is frozen
+                        if (heroAttacker.isFrozen()) {
+                            actionOutput.put("command", "useAttackHero");
+                            actionOutput.set("cardAttacker", objectMapper.valueToTree(cardAttacker));
+                            actionOutput.put("error", "Attacker card is frozen.");
+                            // add the action output to the final output
+                            output.add(actionOutput);
+                            break;
+                        }
+                        // get attacked hero
+                        Hero heroAttacked = gameConfiguration.getOtherPlayer().getHero();
+                        // check if attacked card is a Tank, if necessary
+                        Player attackedHeroPlayer = gameConfiguration.getOtherPlayer();
+                        if (attackedHeroPlayer.hasTanksOnBoard(gameBoard)) {
+                            actionOutput.put("command", "useAttackHero");
+                            actionOutput.set("cardAttacker", objectMapper.valueToTree(cardAttacker));
+                            actionOutput.put("error", "Attacked card is not of type 'Tank'.");
+                            // add the action output to the final output
+                            output.add(actionOutput);
+                            break;
+                        }
+                        // use attack
+                        heroAttacker.attack(heroAttacked);
+                        if (heroAttacked.getHealth() <= 0) {
+                            if (gameConfiguration.getPlayerTurn() == 1) {
+                                actionOutput.put("gameEnded", "Player one killed the enemy hero.");
+                            } else {
+                                actionOutput.put("gameEnded", "Player two killed the enemy hero.");
+                            }
+                            output.add(actionOutput);
+//                            continue gameLoop;
                         }
                         break;
                 }
