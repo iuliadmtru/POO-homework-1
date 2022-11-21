@@ -9,14 +9,20 @@ import gameplay.cards.Minion;
 import java.util.ArrayList;
 
 public class Firestorm extends Environment {
-    public Firestorm(CardInput cardInput) {
+    public Firestorm(final CardInput cardInput) {
         this.setMana(cardInput.getMana());
         this.setDescription(cardInput.getDescription());
         this.setColors(cardInput.getColors());
         this.setName(cardInput.getName());
     }
 
-    public int useAbilityOnRow(int rowIdx, Board board) {
+    /**
+     * Decrease the health of all minions on the row by 1.
+     *
+     * @param rowIdx index of row on which the ability is used
+     * @param board  game board
+     */
+    public int useAbilityOnRow(final int rowIdx, final Board board) {
         ArrayList<Card> cards = board.getCardsOnBoard().get(rowIdx);
         for (Card card : cards) {
             if (card instanceof Minion) {

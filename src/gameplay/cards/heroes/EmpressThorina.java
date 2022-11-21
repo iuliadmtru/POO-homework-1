@@ -8,12 +8,17 @@ import gameplay.cards.Hero;
 import java.util.ArrayList;
 
 public class EmpressThorina extends Hero {
-    public EmpressThorina(CardInput cardInput) {
+    public EmpressThorina(final CardInput cardInput) {
         super(cardInput);
     }
 
-    // low blow
-    public void useAbility(Board board, int rowIdx) {
+    /**
+     * Uses Low Blow ability - destroy the card with the highest health on the row.
+     *
+     * @param board  game board
+     * @param rowIdx index of row on which the ability is used
+     */
+    public void useAbility(final Board board, final int rowIdx) {
         ArrayList<Card> cards = board.getCardsOnBoard().get(rowIdx);
         if (!cards.isEmpty()) {
             Card toKill = cards.get(0);

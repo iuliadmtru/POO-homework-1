@@ -8,12 +8,17 @@ import gameplay.cards.Hero;
 import java.util.ArrayList;
 
 public class LordRoyce extends Hero {
-    public LordRoyce(CardInput cardInput) {
+    public LordRoyce(final CardInput cardInput) {
         super(cardInput);
     }
 
-    // sub-zero
-    public void useAbility(Board board, int rowIdx) {
+    /**
+     * Uses Sub-Zero ability - freeze the card with the highest attack damage on the row.
+     *
+     * @param board  game board
+     * @param rowIdx index of row on which the ability is used
+     */
+    public void useAbility(final Board board, final int rowIdx) {
         ArrayList<Card> cards = board.getCardsOnBoard().get(rowIdx);
         if (!cards.isEmpty()) {
             Card toFreeze = cards.get(0);

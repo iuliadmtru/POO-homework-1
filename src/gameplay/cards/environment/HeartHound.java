@@ -9,23 +9,28 @@ import gameplay.cards.Minion;
 import java.util.ArrayList;
 
 public class HeartHound extends Environment {
-    public HeartHound(CardInput cardInput) {
+    public HeartHound(final CardInput cardInput) {
         this.setMana(cardInput.getMana());
         this.setDescription(cardInput.getDescription());
         this.setColors(cardInput.getColors());
         this.setName(cardInput.getName());
     }
 
-    public int useAbilityOnRow(int rowIdx, Board board) {
+    /**
+     * Steal opponent's minion with the highest health on the row and place it on the mirror row.
+     *
+     * @param rowIdx index of row on which the ability is used
+     * @param board  game board
+     */
+    public int useAbilityOnRow(final int rowIdx, final Board board) {
         // check if the mirror row is full
-        int mirrorRow;
-        switch (rowIdx) {
-            case 0 -> mirrorRow = 3;
-            case 1 -> mirrorRow = 2;
-            case 2 -> mirrorRow = 1;
-            case 3 -> mirrorRow = 0;
-            default -> mirrorRow = -1;
-        }
+        int mirrorRow = switch (rowIdx) {
+            case 0 -> 3;
+            case 1 -> 2;
+            case 2 -> 1;
+            case 3 -> 0;
+            default -> -1;
+        };
         if (board.isFull(mirrorRow)) {
             return 6; // CANNOT_STEAL error code
         }
