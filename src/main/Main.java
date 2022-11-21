@@ -85,8 +85,9 @@ public final class Main {
 
         ArrayNode output = objectMapper.createArrayNode();
 
-        // set counters for player wins
+        // set counters for statistics
         int playerOneWins = 0, playerTwoWins = 0;
+        int gamesPlayed = 0;
         // get players decks lists
         ArrayList<ArrayList<CardInput>> playerOneDecks = inputData.getPlayerOneDecks().getDecks();
         ArrayList<ArrayList<CardInput>> playerTwoDecks = inputData.getPlayerTwoDecks().getDecks();
@@ -407,7 +408,7 @@ public final class Main {
                         }
                         // check if attacked card is a Tank, if necessary
                         Player abilityAttackedPlayer = gameConfiguration.getOtherPlayer();
-                        if (abilityAttackedPlayer.hasTanksOnBoard(gameBoard) && !(abilityAttacked instanceof Tank)) {
+                        if (!(abilityAttacker instanceof Disciple) && abilityAttackedPlayer.hasTanksOnBoard(gameBoard) && !(abilityAttacked instanceof Tank)) {
                             actionOutput.put("command", "cardUsesAbility");
                             actionOutput.set("cardAttacker", objectMapper.valueToTree(cardAttacker));
                             actionOutput.set("cardAttacked", objectMapper.valueToTree(cardAttacked));
@@ -464,6 +465,7 @@ public final class Main {
                                 actionOutput.put("gameEnded", "Player two killed the enemy hero.");
                                 playerTwoWins++;
                             }
+                            gamesPlayed++;
                             output.add(actionOutput);
                         }
                         break;
@@ -523,7 +525,7 @@ public final class Main {
                         break;
                     case "getTotalGamesPlayed":
                         actionOutput.put("command", "getTotalGamesPlayed");
-                        actionOutput.put("output", games.size());
+                        actionOutput.put("output", gamesPlayed);
                         // add the action output to the final output
                         output.add(actionOutput);
                         break;
