@@ -5,7 +5,7 @@ import gameplay.Board;
 import gameplay.Player;
 import gameplay.cards.Minion;
 
-public class Miraj extends Minion implements SpecialAbility {
+public class Miraj extends AbilityMinion {
     public Miraj(CardInput cardInput) {
         this.setMana(cardInput.getMana());
         this.setAttackDamage(cardInput.getAttackDamage());
@@ -19,6 +19,7 @@ public class Miraj extends Minion implements SpecialAbility {
         int newOpponentHealth = this.getHealth();
         this.setHealth(minion.getHealth());
         minion.setHealth(newOpponentHealth);
+        this.setAttackState(true);
     }
 
     // place on front row

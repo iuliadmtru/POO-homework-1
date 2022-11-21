@@ -15,16 +15,16 @@ import gameplay.Player;
 import gameplay.cards.Environment;
 import gameplay.cards.Hero;
 import gameplay.cards.Minion;
+import gameplay.cards.minions.AbilityMinion;
+import gameplay.cards.minions.Disciple;
 import gameplay.cards.minions.Tank;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -349,11 +349,71 @@ public final class Main {
                         }
                         // use attack
                         attacker.attack(attacked);
-                        if (attacked.getHealth() == 0) {
+                        if (attacked.getHealth() <= 0) {
                             gameBoard.removeCard(attacked);
                         }
                         break;
                     case "cardUsesAbility":
+                        // get attacker card
+                        AbilityMinion abilityAttacker = (AbilityMinion) gameBoard.getCardAtPosition(cardAttacker.getX(), cardAttacker.getY());
+                        // check if the card has already attacked
+                        if (abilityAttacker.hasAttacked()) {
+                            actionOutput.put("command", "cardUsesAbility");
+                            actionOutput.set("cardAttacker", objectMapper.valueToTree(cardAttacker));
+                            actionOutput.set("cardAttacked", objectMapper.valueToTree(cardAttacked));
+                            actionOutput.put("error", "Attacker card has already attacked this turn.");
+                            // add the action output to the final output
+                            output.add(actionOutput);
+                            break;
+                        }
+                        // check if the attacker card is frozen
+                        if (abilityAttacker.isFrozen()) {
+                            actionOutput.put("command", "cardUsesAbility");
+                            actionOutput.set("cardAttacker", objectMapper.valueToTree(cardAttacker));
+                            actionOutput.set("cardAttacked", objectMapper.valueToTree(cardAttacked));
+                            actionOutput.put("error", "Attacker card is frozen.");
+                            // add the action output to the final output
+                            output.add(actionOutput);
+                            break;
+                        }
+                        // get attacked card
+                        Card abilityAttacked = gameBoard.getCardAtPosition(cardAttacked.getX(), cardAttacked.getY());
+                        // check who the attacked card belongs to
+                        boolean belongsToSelf = currentPlayer.hasRow(cardAttacked.getX());
+                        // check if the attacked card belongs to whom it should
+                        if (belongsToSelf && !(abilityAttacker instanceof Disciple)) {
+                            actionOutput.put("command", "cardUsesAbility");
+                            actionOutput.set("cardAttacker", objectMapper.valueToTree(cardAttacker));
+                            actionOutput.set("cardAttacked", objectMapper.valueToTree(cardAttacked));
+                            actionOutput.put("error", "Attacked card does not belong to the enemy.");
+                            // add the action output to the final output
+                            output.add(actionOutput);
+                            break;
+                        }
+                        if (!belongsToSelf && abilityAttacker instanceof Disciple) {
+                            actionOutput.put("command", "cardUsesAbility");
+                            actionOutput.set("cardAttacker", objectMapper.valueToTree(cardAttacker));
+                            actionOutput.set("cardAttacked", objectMapper.valueToTree(cardAttacked));
+                            actionOutput.put("error", "Attacked card does not belong to the current player.");
+                            // add the action output to the final output
+                            output.add(actionOutput);
+                            break;
+                        }
+                        // check if attacked card is a Tank, if necessary
+                        Player abilityAttackedPlayer = gameConfiguration.getOtherPlayer();
+                        if (abilityAttackedPlayer.hasTanksOnBoard(gameBoard) && !(abilityAttacked instanceof Tank)) {
+                            actionOutput.put("command", "cardUsesAbility");
+                            actionOutput.set("cardAttacker", objectMapper.valueToTree(cardAttacker));
+                            actionOutput.set("cardAttacked", objectMapper.valueToTree(cardAttacked));
+                            actionOutput.put("error", "Attacked card is not of type 'Tank'.");
+                            // add the action output to the final output
+                            output.add(actionOutput);
+                            break;
+                        }
+                        abilityAttacker.useAbilityOn((Minion) abilityAttacked);
+                        if (abilityAttacked.getHealth() <= 0) {
+                            gameBoard.removeCard(abilityAttacked);
+                        }
                         break;
                 }
             }

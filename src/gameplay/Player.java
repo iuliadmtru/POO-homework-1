@@ -92,14 +92,14 @@ public class Player {
     }
 
     public void takeCard() {
+        // card belongs to player `playerIdx`
+        deck.get(0).setOwner(playerIdx);
+        // add card in hand and remove from deck
         cardsInHand.add(deck.get(0));
         deck.remove(0);
     }
 
     public int placeCard(int cardIdx, Board board) {
-//        if (cardIdx >= cardsInHand.size()) {
-//            return 0;
-//        }
         // get the card from the player's hand
         Card card = cardsInHand.get(cardIdx);
         if (card.getMana() > mana) {

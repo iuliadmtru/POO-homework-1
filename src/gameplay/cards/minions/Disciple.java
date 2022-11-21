@@ -5,7 +5,7 @@ import gameplay.Board;
 import gameplay.Player;
 import gameplay.cards.Minion;
 
-public class Disciple extends Minion implements SpecialAbility {
+public class Disciple extends AbilityMinion {
     public Disciple(CardInput cardInput) {
         this.setMana(cardInput.getMana());
         this.setAttackDamage(0);
@@ -18,6 +18,7 @@ public class Disciple extends Minion implements SpecialAbility {
     // god's plan
     public void useAbilityOn(Minion minion) {
         minion.setHealth(minion.getHealth() + 2);
+        this.setAttackState(true);
     }
 
     // place on back row

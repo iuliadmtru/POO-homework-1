@@ -3,10 +3,9 @@ package gameplay.cards.minions;
 import fileio.CardInput;
 import gameplay.Board;
 import gameplay.Player;
-import gameplay.cards.FightCard;
 import gameplay.cards.Minion;
 
-public class TheRipper extends Minion implements SpecialAbility {
+public class TheRipper extends AbilityMinion {
     public TheRipper(CardInput cardInput) {
         this.setMana(cardInput.getMana());
         this.setAttackDamage(cardInput.getAttackDamage());
@@ -17,7 +16,10 @@ public class TheRipper extends Minion implements SpecialAbility {
     }
     // weak knees
     public void useAbilityOn(Minion minion) {
-        minion.setAttackDamage(minion.getAttackDamage() - 2);
+        if (minion.getAttackDamage() > 0) {
+            minion.setAttackDamage(minion.getAttackDamage() - 2);
+        }
+        this.setAttackState(true);
     }
 
     // place on front row

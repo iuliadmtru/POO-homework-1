@@ -5,7 +5,7 @@ import gameplay.Board;
 import gameplay.Player;
 import gameplay.cards.Minion;
 
-public class TheCursedOne extends Minion implements SpecialAbility {
+public class TheCursedOne extends AbilityMinion {
     public TheCursedOne(CardInput cardInput) {
         this.setMana(cardInput.getMana());
         this.setAttackDamage(0);
@@ -19,6 +19,7 @@ public class TheCursedOne extends Minion implements SpecialAbility {
         int newOpponentAttackDamage = minion.getHealth();
         minion.setHealth(minion.getAttackDamage());
         minion.setAttackDamage(newOpponentAttackDamage);
+        this.setAttackState(true);
     }
 
     // place on back row

@@ -14,6 +14,7 @@ public abstract class Card {
     private ArrayList<String> colors;
     private String name;
     private boolean frozen = false;
+    private int owner;
 
     public Card(CardInput cardInput) {
         mana = cardInput.getMana();
@@ -95,4 +96,16 @@ public abstract class Card {
     }
 
     public abstract int placeOnBoardOf(Player player, Board board);
+
+    public void setOwner(int owner) {
+        this.owner = owner;
+    }
+
+    public void changeOwner() {
+        owner = owner == 1 ? 2 : 1;
+    }
+
+    public boolean belongsTo(int playerIdx) {
+        return owner == playerIdx;
+    }
 }
