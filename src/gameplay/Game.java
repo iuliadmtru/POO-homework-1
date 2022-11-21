@@ -39,6 +39,8 @@ public class Game {
         currentPlayer.unfreezeCards(gameBoard);
         // change attack state of cards on board
         currentPlayer.resetAttackStateOfCards(gameBoard);
+        // change attack state of hero
+        currentPlayer.resetAttackStateOfHero();
         // change player turn
         playerTurn = playerTurn == 1 ? 2 : 1;
         // set/reset turn counter and change round

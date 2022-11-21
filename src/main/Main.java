@@ -15,6 +15,10 @@ import gameplay.Player;
 import gameplay.cards.Environment;
 import gameplay.cards.Hero;
 import gameplay.cards.Minion;
+import gameplay.cards.heroes.EmpressThorina;
+import gameplay.cards.heroes.GeneralKocioraw;
+import gameplay.cards.heroes.KingMudface;
+import gameplay.cards.heroes.LordRoyce;
 import gameplay.cards.minions.AbilityMinion;
 import gameplay.cards.minions.Disciple;
 import gameplay.cards.minions.Tank;
@@ -81,12 +85,14 @@ public final class Main {
 
         ArrayNode output = objectMapper.createArrayNode();
 
+        // set counters for player wins
+        int playerOneWins = 0, playerTwoWins = 0;
         // get players decks lists
         ArrayList<ArrayList<CardInput>> playerOneDecks = inputData.getPlayerOneDecks().getDecks();
         ArrayList<ArrayList<CardInput>> playerTwoDecks = inputData.getPlayerTwoDecks().getDecks();
         // iterate through all games
         ArrayList<GameInput> games = inputData.getGames();
-        gameLoop: for (GameInput game : games) {
+        for (GameInput game : games) {
             // set starting configuration
             StartGameInput startInput = game.getStartGame();
             Player playerOne = new Player();
@@ -453,12 +459,73 @@ public final class Main {
                         if (heroAttacked.getHealth() <= 0) {
                             if (gameConfiguration.getPlayerTurn() == 1) {
                                 actionOutput.put("gameEnded", "Player one killed the enemy hero.");
+                                playerOneWins++;
                             } else {
                                 actionOutput.put("gameEnded", "Player two killed the enemy hero.");
+                                playerTwoWins++;
                             }
                             output.add(actionOutput);
-//                            continue gameLoop;
                         }
+                        break;
+                    case "useHeroAbility":
+                        Hero currentPlayerHero = currentPlayer.getHero();
+                        // check if player has enough mana to use ability
+                        if (currentPlayer.getMana() < currentPlayerHero.getMana()) {
+                            actionOutput.put("command", "useHeroAbility");
+                            actionOutput.put("affectedRow", affectedRow);
+                            actionOutput.put("error", "Not enough mana to use hero's ability.");
+                            // add the action output to the final output
+                            output.add(actionOutput);
+                            break;
+                        }
+                        // check if hero has already attacked
+                        if (currentPlayerHero.hasAttacked()) {
+                            actionOutput.put("command", "useHeroAbility");
+                            actionOutput.put("affectedRow", affectedRow);
+                            actionOutput.put("error", "Hero has already attacked this turn.");
+                            // add the action output to the final output
+                            output.add(actionOutput);
+                            break;
+                        }
+                        // check if the attacked row belongs to whom it should
+                        boolean rowBelongsToSelf = currentPlayer.hasRow(affectedRow);
+                        if (!rowBelongsToSelf && ((currentPlayerHero instanceof GeneralKocioraw) || (currentPlayerHero instanceof KingMudface))) {
+                            actionOutput.put("command", "useHeroAbility");
+                            actionOutput.put("affectedRow", affectedRow);
+                            actionOutput.put("error", "Selected row does not belong to the current player.");
+                            // add the action output to the final output
+                            output.add(actionOutput);
+                            break;
+                        }
+                        if (rowBelongsToSelf && ((currentPlayerHero instanceof LordRoyce) || (currentPlayerHero instanceof EmpressThorina))) {
+                            actionOutput.put("command", "useHeroAbility");
+                            actionOutput.put("affectedRow", affectedRow);
+                            actionOutput.put("error", "Selected row does not belong to the enemy.");
+                            // add the action output to the final output
+                            output.add(actionOutput);
+                            break;
+                        }
+                        currentPlayerHero.useAbility(gameBoard, affectedRow);
+                        currentPlayer.decreaseManaBy(currentPlayerHero.getMana());
+                        break;
+                    // statistics commands
+                    case "getPlayerOneWins":
+                        actionOutput.put("command", "getPlayerOneWins");
+                        actionOutput.put("output", playerOneWins);
+                        // add the action output to the final output
+                        output.add(actionOutput);
+                        break;
+                    case "getPlayerTwoWins":
+                        actionOutput.put("command", "getPlayerTwoWins");
+                        actionOutput.put("output", playerTwoWins);
+                        // add the action output to the final output
+                        output.add(actionOutput);
+                        break;
+                    case "getTotalGamesPlayed":
+                        actionOutput.put("command", "getTotalGamesPlayed");
+                        actionOutput.put("output", games.size());
+                        // add the action output to the final output
+                        output.add(actionOutput);
                         break;
                 }
             }

@@ -15,15 +15,17 @@ public class LordRoyce extends Hero {
     // sub-zero
     public void useAbility(Board board, int rowIdx) {
         ArrayList<Card> cards = board.getCardsOnBoard().get(rowIdx);
-        Card toFreeze = cards.get(0);
-        int maxAttackDamage = toFreeze.getAttackDamage();
-        for (Card card : cards) {
-            if (card.getAttackDamage() > maxAttackDamage) {
-                maxAttackDamage = card.getAttackDamage();
-                toFreeze = card;
+        if (!cards.isEmpty()) {
+            Card toFreeze = cards.get(0);
+            int maxAttackDamage = toFreeze.getAttackDamage();
+            for (Card card : cards) {
+                if (card.getAttackDamage() > maxAttackDamage) {
+                    maxAttackDamage = card.getAttackDamage();
+                    toFreeze = card;
+                }
             }
+            toFreeze.setFrozen(true);
         }
-        toFreeze.setFrozen(true);
         // mark attack
         this.setAttackState(true);
     }

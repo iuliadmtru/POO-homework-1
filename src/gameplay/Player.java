@@ -201,4 +201,8 @@ public class Player {
                 }
         }
     }
+
+    public void resetAttackStateOfHero() {
+        getHero().resetAttackState();
+    }
 }
