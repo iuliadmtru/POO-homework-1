@@ -11,7 +11,12 @@ import gameplay.cards.heroes.EmpressThorina;
 import gameplay.cards.heroes.GeneralKocioraw;
 import gameplay.cards.heroes.KingMudface;
 import gameplay.cards.heroes.LordRoyce;
-import gameplay.cards.minions.*;
+import gameplay.cards.minions.Disciple;
+import gameplay.cards.minions.Miraj;
+import gameplay.cards.minions.RegularMinion;
+import gameplay.cards.minions.Tank;
+import gameplay.cards.minions.TheCursedOne;
+import gameplay.cards.minions.TheRipper;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,32 +27,67 @@ public class Player {
     private int mana;
     private Hero hero;
     private ArrayList<Card> deck;
-    private ArrayList<Card> cardsInHand = new ArrayList<>();
+    private final ArrayList<Card> cardsInHand = new ArrayList<>();
 
+    /**
+     * Returns the index of the player (1 or 2).
+     *
+     * @return player index
+     */
     public int getPlayerIdx() {
         return playerIdx;
     }
 
-    public void setPlayerIdx(int playerIdx) {
+    /**
+     * Sets the index of the player (1 or 2).
+     *
+     * @param playerIdx player index
+     */
+    public void setPlayerIdx(final int playerIdx) {
         this.playerIdx = playerIdx;
     }
 
+    /**
+     * Returns the amount of mana the player has.
+     *
+     * @return player mana
+     */
     public int getMana() {
         return mana;
     }
 
+    /**
+     * Increases the amount of mana the player has by an amount.
+     *
+     * @param amount amount by which the mana is increased
+     */
     public void increaseManaBy(int amount) {
         mana += amount;
     }
 
+    /**
+     * Decreases the amount of mana the player has by an amount.
+     *
+     * @param amount amount by which the mana is decreased
+     */
     public void decreaseManaBy(int amount) {
         mana -= amount;
     }
 
+    /**
+     * Returns the hero of the player.
+     *
+     * @return player hero
+     */
     public Hero getHero() {
         return hero;
     }
 
+    /**
+     * Sets the hero of the player.
+     *
+     * @param heroInput player hero input
+     */
     public void setHero(CardInput heroInput) {
         switch (heroInput.getName()) {
             case "Lord Royce" -> hero = new LordRoyce(heroInput);
@@ -57,10 +97,20 @@ public class Player {
         }
     }
 
+    /**
+     * Returns the deck that the player chose.
+     *
+     * @return player deck
+     */
     public ArrayList<Card> getDeck() {
         return deck;
     }
 
+    /**
+     * Sets the deck that the player chose.
+     *
+     * @param deckInput player deck input
+     */
     public void setDeck(ArrayList<CardInput> deckInput) {
         deck = new ArrayList<Card>();
         for (CardInput cardInput : deckInput) {
@@ -70,7 +120,6 @@ public class Player {
                 case "Firestorm" -> deck.add(new Firestorm(cardInput));
                 case "Winterfell" -> deck.add(new Winterfell(cardInput));
                 case "Heart Hound" -> deck.add(new HeartHound(cardInput));
-
                 // minion
                 case "Goliath", "Warden" -> deck.add(new Tank(cardInput));
                 case "Sentinel", "Berserker" -> deck.add(new RegularMinion(cardInput));
@@ -82,14 +131,29 @@ public class Player {
         }
     }
 
+    /**
+     * Shuffles the deck that the player chose with a given seed.
+     *
+     * @param seed shuffle seed
+     */
     public void shuffleDeckWithSeed(int seed) {
         Collections.shuffle(deck, new Random(seed));
     }
 
+    /**
+     * Returns the cards that the player has in hand.
+     *
+     * @return cards in hand
+     */
     public ArrayList<Card> getCardsInHand() {
         return cardsInHand;
     }
 
+    /**
+     * Returns the environment cards that the player has in hand.
+     *
+     * @return environment cards in hand
+     */
     public ArrayList<Environment> getEnvironmentCardsInHand() {
         ArrayList<Environment> environmentCards = new ArrayList<Environment>();
         for (Card card : cardsInHand) {
@@ -100,14 +164,22 @@ public class Player {
         return environmentCards;
     }
 
+    /**
+     * Takes a card from the deck.
+     */
     public void takeCard() {
-        // card belongs to player `playerIdx`
-        deck.get(0).setOwner(playerIdx);
         // add card in hand and remove from deck
         cardsInHand.add(deck.get(0));
         deck.remove(0);
     }
 
+    /**
+     * Places a card on the board.
+     *
+     * @param cardIdx index of the card from the hand that is placed on the board
+     * @param board game board
+     * @return 0 if successful, error code otherwise
+     */
     public int placeCard(int cardIdx, Board board) {
         // get the card from the player's hand
         Card card = cardsInHand.get(cardIdx);
@@ -123,6 +195,11 @@ public class Player {
         return exitCode;
     }
 
+    /**
+     * Unfreeze all the cards of the player (usually done at the end of the player's turn).
+     *
+     * @param board game board
+     */
     public void unfreezeCards(Board board) {
         ArrayList<ArrayList<Card>> playerCards = board.getPlayerCardsOnBoard(playerIdx);
         for (ArrayList<Card> cardsOnRow : playerCards) {
@@ -132,6 +209,12 @@ public class Player {
         }
     }
 
+    /**
+     * Checks if a board row corresponds to the player.
+     *
+     * @param rowIdx index of checked row
+     * @return `true` if the row corresponds to the player, `false` otherwise
+     */
     public boolean hasRow(int rowIdx) {
         return switch (playerIdx) {
             case 1 -> (rowIdx == 2 || rowIdx == 3);
@@ -140,6 +223,14 @@ public class Player {
         };
     }
 
+    /**
+     * Use an environment card from the hand deck on a given row.
+     *
+     * @param rowIdx affected row index
+     * @param card used card
+     * @param board game board
+     * @return 0 if successful, error code otherwise
+     */
     public int useEnvironmentCard(Environment card, int rowIdx, Board board) {
         if (card.getMana() > mana) {
             return 4; // NOT_ENOUGH_MANA_ENV error code
@@ -158,6 +249,12 @@ public class Player {
         return exitCode;
     }
 
+    /**
+     * Check if the player has cards of type `Tank` placed on the board.
+     *
+     * @param board game board
+     * @return `true` if the player has `Tank`s, `false` otherwise
+     */
     public boolean hasTanksOnBoard(Board board) {
         switch (playerIdx) {
             case 1:
@@ -181,6 +278,12 @@ public class Player {
         }
     }
 
+    /**
+     * Marks all the player's cards on the board as cards that have not attacked (usually done at
+     * the end of the player's turn).
+     *
+     * @param board game board
+     */
     public void resetAttackStateOfCards(Board board) {
         switch (playerIdx) {
             case 1:
@@ -202,6 +305,10 @@ public class Player {
         }
     }
 
+    /**
+     * Marks the player's hero as card that has not attacked (usually done at the end of the
+     * player's turn).
+     */
     public void resetAttackStateOfHero() {
         getHero().resetAttackState();
     }
