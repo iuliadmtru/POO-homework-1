@@ -6,7 +6,7 @@ import gameplay.Player;
 import gameplay.cards.Minion;
 
 public class TheCursedOne extends AbilityMinion {
-    public TheCursedOne(CardInput cardInput) {
+    public TheCursedOne(final CardInput cardInput) {
         this.setMana(cardInput.getMana());
         this.setAttackDamage(0);
         this.setHealth(cardInput.getHealth());
@@ -14,16 +14,27 @@ public class TheCursedOne extends AbilityMinion {
         this.setColors(cardInput.getColors());
         this.setName("The Cursed One");
     }
-    // shapeshift
-    public void useAbilityOn(Minion minion) {
+
+    /**
+     * Use Shapeshift ability - swaps an opponent minion's health and attack damage.
+     *
+     * @param minion opponent minion
+     */
+    public void useAbilityOn(final Minion minion) {
         int newOpponentAttackDamage = minion.getHealth();
         minion.setHealth(minion.getAttackDamage());
         minion.setAttackDamage(newOpponentAttackDamage);
         this.setAttackState(true);
     }
 
-    // place on back row
-    public int placeOnBoardOf(Player player, Board board) {
+    /**
+     * Places The Cursed One minion on the back row of the player's board.
+     *
+     * @param player player whose board the card is placed on
+     * @param board  game board
+     * @return       0 if successful, 1 if the target row is full
+     */
+    public int placeOnBoardOf(final Player player, final Board board) {
         int row = player.getPlayerIdx() == 1 ? 3 : 0;
         if (board.isFull(row)) {
             return 1; // ROW_IS_FULL error code
