@@ -17,15 +17,31 @@ public class Board {
         cardsOnBoard.add(rowThreeCards);
     }
 
+    /**
+     * Returns the cards on the board as a matrix.
+     *
+     * @return card matrix
+     */
     public ArrayList<ArrayList<Card>> getCardsOnBoard() {
         return cardsOnBoard;
     }
 
-    public void setCardsOnBoard(ArrayList<ArrayList<Card>> cards) {
+    /**
+     * Sets the cards on the board as a matrix.
+     *
+     * @param cards card matrix
+     */
+    public void setCardsOnBoard(final ArrayList<ArrayList<Card>> cards) {
         cardsOnBoard = cards;
     }
 
-    public ArrayList<ArrayList<Card>> getPlayerCardsOnBoard(int playerIdx) {
+    /**
+     * Returns the cards on the board corresponding to a given player.
+     *
+     * @param playerIdx index of player whose cards are returned
+     * @return card matrix
+     */
+    public ArrayList<ArrayList<Card>> getPlayerCardsOnBoard(final int playerIdx) {
         ArrayList<ArrayList<Card>> playerCards = new ArrayList<>();
         if (playerIdx == 1) {
             playerCards.add(cardsOnBoard.get(2));
@@ -37,15 +53,35 @@ public class Board {
         return playerCards;
     }
 
-    public boolean isFull(int row) {
+    /**
+     * Checks if a board row is full.
+     *
+     * @param row checked row index
+     * @return `true` if the row is full, `false` otherwise
+     */
+    public boolean isFull(final int row) {
         return cardsOnBoard.get(row).size() == 5;
     }
 
-    public void addCard(Card card, int row) {
+    /**
+     * Adds a card on a given row.
+     *
+     * @param card added card
+     * @param row  row index
+     */
+    public void addCard(final Card card, final int row) {
         cardsOnBoard.get(row).add(card);
     }
 
-    public void moveCard(int fromRow, int fromCol, int toRow, int toCol) {
+    /**
+     * Moves a card from a given set of coordinates to another given set of coordinates.
+     *
+     * @param fromRow source row
+     * @param fromCol source col
+     * @param toRow destination row
+     * @param toCol destination col
+     */
+    public void moveCard(final int fromRow, final int fromCol, final int toRow, final int toCol) {
         Card movedCard = cardsOnBoard.get(fromRow).get(fromCol);
         // remove from initial position
         cardsOnBoard.get(fromRow).remove(fromCol);
@@ -53,17 +89,33 @@ public class Board {
         cardsOnBoard.get(toRow).add(movedCard);
     }
 
-    public void removeCard(Card card) {
+    /**
+     * Remove a card from the board.
+     *
+     * @param card added card
+     */
+    public void removeCard(final Card card) {
         for (int rowIdx = 0; rowIdx < 4; rowIdx++) {
             cardsOnBoard.get(rowIdx).remove(card);
         }
     }
 
-    public void removeCard(Card card, int fromRow) {
+    /**
+     * Remove a card from a given row on the board.
+     *
+     * @param card    added card
+     * @param fromRow source row index
+     */
+    public void removeCard(final Card card, final int fromRow) {
         cardsOnBoard.get(fromRow).remove(card);
     }
 
-    public void removeDeadCards(int rowIdx) {
+    /**
+     * Remove all cards with zero health from the given row.
+     *
+     * @param rowIdx source row index
+     */
+    public void removeDeadCards(final int rowIdx) {
         ArrayList<Card> removedCards = new ArrayList<>();
         for (Card card : cardsOnBoard.get(rowIdx)) {
             if (card.getHealth() == 0) {
@@ -76,7 +128,14 @@ public class Board {
         }
     }
 
-    public boolean hasCardAtPosition(int rowIdx, int colIdx) {
+    /**
+     * Checks if there is a card at a given position.
+     *
+     * @param rowIdx row index
+     * @param colIdx col index
+     * @return `true` if a card exists, `false` otherwise
+     */
+    public boolean hasCardAtPosition(final int rowIdx, final int colIdx) {
         if (cardsOnBoard.get(rowIdx).isEmpty()) {
             return false;
         }
@@ -86,10 +145,22 @@ public class Board {
         return true;
     }
 
-    public Card getCardAtPosition(int rowIdx, int colIdx) {
+    /**
+     * Returns the card from the given position.
+     *
+     * @param rowIdx row index
+     * @param colIdx col index
+     * @return card from given position
+     */
+    public Card getCardAtPosition(final int rowIdx, final int colIdx) {
         return cardsOnBoard.get(rowIdx).get(colIdx);
     }
 
+    /**
+     * Returns all frozen cards on the board.
+     *
+     * @return frozen cards on the board
+     */
     public ArrayList<Card> getFrozenCards() {
         ArrayList<Card> frozenCards = new ArrayList<>();
         for (ArrayList<Card> cardsOnRow : cardsOnBoard) {

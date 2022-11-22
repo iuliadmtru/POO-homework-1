@@ -7,7 +7,12 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import checker.CheckerConstants;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import fileio.*;
+import fileio.ActionsInput;
+import fileio.CardInput;
+import fileio.Coordinates;
+import fileio.GameInput;
+import fileio.Input;
+import fileio.StartGameInput;
 import gameplay.Board;
 import gameplay.Card;
 import gameplay.Game;
@@ -201,11 +206,13 @@ public final class Main {
                         break;
                     case "getEnvironmentCardsInHand":
                         Player playerWithEnvCards = players.get(playerIdx - 1);
-                        ArrayList<Environment> environmentCardsInHand = playerWithEnvCards.getEnvironmentCardsInHand();
+                        ArrayList<Environment> environmentCardsInHand =
+                                playerWithEnvCards.getEnvironmentCardsInHand();
                         // store output
                         actionOutput.put("command", "getEnvironmentCardsInHand");
                         actionOutput.put("playerIdx", playerIdx);
-                        ArrayNode environmentCardsArray = objectMapper.valueToTree(environmentCardsInHand);
+                        ArrayNode environmentCardsArray =
+                                objectMapper.valueToTree(environmentCardsInHand);
                         actionOutput.set("output", environmentCardsArray);
                         // add the action output to the final output
                         output.add(actionOutput);
@@ -235,7 +242,8 @@ public final class Main {
                         ArrayList<Card> frozenCardsOnTable = gameBoard.getFrozenCards();
                         // store output
                         actionOutput.put("command", "getFrozenCardsOnTable");
-                        ArrayNode frozenCardsOnTableArray = objectMapper.valueToTree(frozenCardsOnTable);
+                        ArrayNode frozenCardsOnTableArray =
+                                objectMapper.valueToTree(frozenCardsOnTable);
                         actionOutput.set("output", frozenCardsOnTableArray);
                         // add the action output to the final output
                         output.add(actionOutput);
@@ -249,23 +257,28 @@ public final class Main {
                             case 1 -> { // ROW_IS_FULL
                                 actionOutput.put("command", "placeCard");
                                 actionOutput.put("handIdx", handIdx);
-                                actionOutput.put("error", "Cannot place card on table since row is full.");
+                                actionOutput.put("error",
+                                        "Cannot place card on table since row is full.");
                                 // add the action output to the final output
                                 output.add(actionOutput);
                             }
                             case 2 -> { // ENV_CARD_CANNOT_BE_PLACED
                                 actionOutput.put("command", "placeCard");
                                 actionOutput.put("handIdx", handIdx);
-                                actionOutput.put("error", "Cannot place environment card on table.");
+                                actionOutput.put("error",
+                                        "Cannot place environment card on table.");
                                 // add the action output to the final output
                                 output.add(actionOutput);
                             }
                             case 3 -> { // NOT_ENOUGH_MANA
                                 actionOutput.put("command", "placeCard");
                                 actionOutput.put("handIdx", handIdx);
-                                actionOutput.put("error", "Not enough mana to place card on table.");
+                                actionOutput.put("error",
+                                        "Not enough mana to place card on table.");
                                 // add the action output to the final output
                                 output.add(actionOutput);
+                            }
+                            default -> {
                             }
                         }
                         break;
@@ -276,17 +289,20 @@ public final class Main {
                             actionOutput.put("command", "useEnvironmentCard");
                             actionOutput.put("handIdx", handIdx);
                             actionOutput.put("affectedRow", affectedRow);
-                            actionOutput.put("error", "Chosen card is not of type environment.");
+                            actionOutput.put("error",
+                                    "Chosen card is not of type environment.");
                             // add the action output to the final output
                             output.add(actionOutput);
                             break;
                         }
-                        switch (currentPlayer.useEnvironmentCard((Environment) chosenCard, affectedRow, gameBoard)) {
+                        switch (currentPlayer.useEnvironmentCard((Environment) chosenCard,
+                                affectedRow, gameBoard)) {
                             case 4 -> {
                                 actionOutput.put("command", "useEnvironmentCard");
                                 actionOutput.put("handIdx", handIdx);
                                 actionOutput.put("affectedRow", affectedRow);
-                                actionOutput.put("error", "Not enough mana to use environment card.");
+                                actionOutput.put("error",
+                                        "Not enough mana to use environment card.");
                                 // add the action output to the final output
                                 output.add(actionOutput);
                             }
@@ -294,7 +310,8 @@ public final class Main {
                                 actionOutput.put("command", "useEnvironmentCard");
                                 actionOutput.put("handIdx", handIdx);
                                 actionOutput.put("affectedRow", affectedRow);
-                                actionOutput.put("error", "Chosen row does not belong to the enemy.");
+                                actionOutput.put("error",
+                                        "Chosen row does not belong to the enemy.");
                                 // add the action output to the final output
                                 output.add(actionOutput);
                             }
@@ -302,31 +319,40 @@ public final class Main {
                                 actionOutput.put("command", "useEnvironmentCard");
                                 actionOutput.put("handIdx", handIdx);
                                 actionOutput.put("affectedRow", affectedRow);
-                                actionOutput.put("error", "Cannot steal enemy card since the player's row is full.");
+                                actionOutput.put("error",
+                                        "Cannot steal enemy card since the player's row is full.");
                                 // add the action output to the final output
                                 output.add(actionOutput);
                             }
+                            default -> { }
                         }
                         break;
                     case "cardUsesAttack":
                         // check if the attacked card belongs to the attacker
                         if (currentPlayer.hasRow(cardAttacked.getX())) {
                             actionOutput.put("command", "cardUsesAttack");
-                            actionOutput.set("cardAttacker", objectMapper.valueToTree(cardAttacker));
-                            actionOutput.set("cardAttacked", objectMapper.valueToTree(cardAttacked));
-                            actionOutput.put("error", "Attacked card does not belong to the enemy.");
+                            actionOutput.set("cardAttacker",
+                                    objectMapper.valueToTree(cardAttacker));
+                            actionOutput.set("cardAttacked",
+                                    objectMapper.valueToTree(cardAttacked));
+                            actionOutput.put("error",
+                                    "Attacked card does not belong to the enemy.");
                             // add the action output to the final output
                             output.add(actionOutput);
                             break;
                         }
                         // get attacker card
-                        Minion attacker = (Minion) gameBoard.getCardAtPosition(cardAttacker.getX(), cardAttacker.getY());
+                        Minion attacker = (Minion) gameBoard.getCardAtPosition(cardAttacker.getX(),
+                                cardAttacker.getY());
                         // check if the card has already attacked
                         if (attacker.hasAttacked()) {
                             actionOutput.put("command", "cardUsesAttack");
-                            actionOutput.set("cardAttacker", objectMapper.valueToTree(cardAttacker));
-                            actionOutput.set("cardAttacked", objectMapper.valueToTree(cardAttacked));
-                            actionOutput.put("error", "Attacker card has already attacked this turn.");
+                            actionOutput.set("cardAttacker",
+                                    objectMapper.valueToTree(cardAttacker));
+                            actionOutput.set("cardAttacked",
+                                    objectMapper.valueToTree(cardAttacked));
+                            actionOutput.put("error",
+                                    "Attacker card has already attacked this turn.");
                             // add the action output to the final output
                             output.add(actionOutput);
                             break;
@@ -334,22 +360,29 @@ public final class Main {
                         // check if the attacker card is frozen
                         if (attacker.isFrozen()) {
                             actionOutput.put("command", "cardUsesAttack");
-                            actionOutput.set("cardAttacker", objectMapper.valueToTree(cardAttacker));
-                            actionOutput.set("cardAttacked", objectMapper.valueToTree(cardAttacked));
+                            actionOutput.set("cardAttacker",
+                                    objectMapper.valueToTree(cardAttacker));
+                            actionOutput.set("cardAttacked",
+                                    objectMapper.valueToTree(cardAttacked));
                             actionOutput.put("error", "Attacker card is frozen.");
                             // add the action output to the final output
                             output.add(actionOutput);
                             break;
                         }
                         // get attacked card
-                        Card attacked = gameBoard.getCardAtPosition(cardAttacked.getX(), cardAttacked.getY());
+                        Card attacked = gameBoard.getCardAtPosition(cardAttacked.getX(),
+                                cardAttacked.getY());
                         // check if attacked card is a Tank, if necessary
                         Player attackedPlayer = gameConfiguration.getOtherPlayer();
-                        if (attackedPlayer.hasTanksOnBoard(gameBoard) && !(attacked instanceof Tank)) {
+                        if (attackedPlayer.hasTanksOnBoard(gameBoard)
+                                && !(attacked instanceof Tank)) {
                             actionOutput.put("command", "cardUsesAttack");
-                            actionOutput.set("cardAttacker", objectMapper.valueToTree(cardAttacker));
-                            actionOutput.set("cardAttacked", objectMapper.valueToTree(cardAttacked));
-                            actionOutput.put("error", "Attacked card is not of type 'Tank'.");
+                            actionOutput.set("cardAttacker",
+                                    objectMapper.valueToTree(cardAttacker));
+                            actionOutput.set("cardAttacked",
+                                    objectMapper.valueToTree(cardAttacked));
+                            actionOutput.put("error",
+                                    "Attacked card is not of type 'Tank'.");
                             // add the action output to the final output
                             output.add(actionOutput);
                             break;
@@ -362,13 +395,18 @@ public final class Main {
                         break;
                     case "cardUsesAbility":
                         // get attacker card
-                        AbilityMinion abilityAttacker = (AbilityMinion) gameBoard.getCardAtPosition(cardAttacker.getX(), cardAttacker.getY());
+                        AbilityMinion abilityAttacker =
+                                (AbilityMinion) gameBoard.getCardAtPosition(cardAttacker.getX(),
+                                        cardAttacker.getY());
                         // check if the card has already attacked
                         if (abilityAttacker.hasAttacked()) {
                             actionOutput.put("command", "cardUsesAbility");
-                            actionOutput.set("cardAttacker", objectMapper.valueToTree(cardAttacker));
-                            actionOutput.set("cardAttacked", objectMapper.valueToTree(cardAttacked));
-                            actionOutput.put("error", "Attacker card has already attacked this turn.");
+                            actionOutput.set("cardAttacker",
+                                    objectMapper.valueToTree(cardAttacker));
+                            actionOutput.set("cardAttacked",
+                                    objectMapper.valueToTree(cardAttacked));
+                            actionOutput.put("error",
+                                    "Attacker card has already attacked this turn.");
                             // add the action output to the final output
                             output.add(actionOutput);
                             break;
@@ -376,43 +414,57 @@ public final class Main {
                         // check if the attacker card is frozen
                         if (abilityAttacker.isFrozen()) {
                             actionOutput.put("command", "cardUsesAbility");
-                            actionOutput.set("cardAttacker", objectMapper.valueToTree(cardAttacker));
-                            actionOutput.set("cardAttacked", objectMapper.valueToTree(cardAttacked));
+                            actionOutput.set("cardAttacker",
+                                    objectMapper.valueToTree(cardAttacker));
+                            actionOutput.set("cardAttacked",
+                                    objectMapper.valueToTree(cardAttacked));
                             actionOutput.put("error", "Attacker card is frozen.");
                             // add the action output to the final output
                             output.add(actionOutput);
                             break;
                         }
                         // get attacked card
-                        Card abilityAttacked = gameBoard.getCardAtPosition(cardAttacked.getX(), cardAttacked.getY());
+                        Card abilityAttacked = gameBoard.getCardAtPosition(cardAttacked.getX(),
+                                cardAttacked.getY());
                         // check who the attacked card belongs to
                         boolean belongsToSelf = currentPlayer.hasRow(cardAttacked.getX());
                         // check if the attacked card belongs to whom it should
                         if (belongsToSelf && !(abilityAttacker instanceof Disciple)) {
                             actionOutput.put("command", "cardUsesAbility");
-                            actionOutput.set("cardAttacker", objectMapper.valueToTree(cardAttacker));
-                            actionOutput.set("cardAttacked", objectMapper.valueToTree(cardAttacked));
-                            actionOutput.put("error", "Attacked card does not belong to the enemy.");
+                            actionOutput.set("cardAttacker",
+                                    objectMapper.valueToTree(cardAttacker));
+                            actionOutput.set("cardAttacked",
+                                    objectMapper.valueToTree(cardAttacked));
+                            actionOutput.put("error",
+                                    "Attacked card does not belong to the enemy.");
                             // add the action output to the final output
                             output.add(actionOutput);
                             break;
                         }
                         if (!belongsToSelf && abilityAttacker instanceof Disciple) {
                             actionOutput.put("command", "cardUsesAbility");
-                            actionOutput.set("cardAttacker", objectMapper.valueToTree(cardAttacker));
-                            actionOutput.set("cardAttacked", objectMapper.valueToTree(cardAttacked));
-                            actionOutput.put("error", "Attacked card does not belong to the current player.");
+                            actionOutput.set("cardAttacker",
+                                    objectMapper.valueToTree(cardAttacker));
+                            actionOutput.set("cardAttacked",
+                                    objectMapper.valueToTree(cardAttacked));
+                            actionOutput.put("error",
+                                    "Attacked card does not belong to the current player.");
                             // add the action output to the final output
                             output.add(actionOutput);
                             break;
                         }
                         // check if attacked card is a Tank, if necessary
                         Player abilityAttackedPlayer = gameConfiguration.getOtherPlayer();
-                        if (!(abilityAttacker instanceof Disciple) && abilityAttackedPlayer.hasTanksOnBoard(gameBoard) && !(abilityAttacked instanceof Tank)) {
+                        if (!(abilityAttacker instanceof Disciple)
+                                && abilityAttackedPlayer.hasTanksOnBoard(gameBoard)
+                                && !(abilityAttacked instanceof Tank)) {
                             actionOutput.put("command", "cardUsesAbility");
-                            actionOutput.set("cardAttacker", objectMapper.valueToTree(cardAttacker));
-                            actionOutput.set("cardAttacked", objectMapper.valueToTree(cardAttacked));
-                            actionOutput.put("error", "Attacked card is not of type 'Tank'.");
+                            actionOutput.set("cardAttacker",
+                                    objectMapper.valueToTree(cardAttacker));
+                            actionOutput.set("cardAttacked",
+                                    objectMapper.valueToTree(cardAttacked));
+                            actionOutput.put("error",
+                                    "Attacked card is not of type 'Tank'.");
                             // add the action output to the final output
                             output.add(actionOutput);
                             break;
@@ -424,12 +476,16 @@ public final class Main {
                         break;
                     case "useAttackHero":
                         // get attacker card
-                        Minion heroAttacker = (Minion) gameBoard.getCardAtPosition(cardAttacker.getX(), cardAttacker.getY());
+                        Minion heroAttacker =
+                                (Minion) gameBoard.getCardAtPosition(cardAttacker.getX(),
+                                        cardAttacker.getY());
                         // check if the card has already attacked
                         if (heroAttacker.hasAttacked()) {
                             actionOutput.put("command", "useAttackHero");
-                            actionOutput.set("cardAttacker", objectMapper.valueToTree(cardAttacker));
-                            actionOutput.put("error", "Attacker card has already attacked this turn.");
+                            actionOutput.set("cardAttacker",
+                                    objectMapper.valueToTree(cardAttacker));
+                            actionOutput.put("error",
+                                    "Attacker card has already attacked this turn.");
                             // add the action output to the final output
                             output.add(actionOutput);
                             break;
@@ -437,7 +493,8 @@ public final class Main {
                         // check if the attacker card is frozen
                         if (heroAttacker.isFrozen()) {
                             actionOutput.put("command", "useAttackHero");
-                            actionOutput.set("cardAttacker", objectMapper.valueToTree(cardAttacker));
+                            actionOutput.set("cardAttacker",
+                                    objectMapper.valueToTree(cardAttacker));
                             actionOutput.put("error", "Attacker card is frozen.");
                             // add the action output to the final output
                             output.add(actionOutput);
@@ -449,8 +506,10 @@ public final class Main {
                         Player attackedHeroPlayer = gameConfiguration.getOtherPlayer();
                         if (attackedHeroPlayer.hasTanksOnBoard(gameBoard)) {
                             actionOutput.put("command", "useAttackHero");
-                            actionOutput.set("cardAttacker", objectMapper.valueToTree(cardAttacker));
-                            actionOutput.put("error", "Attacked card is not of type 'Tank'.");
+                            actionOutput.set("cardAttacker",
+                                    objectMapper.valueToTree(cardAttacker));
+                            actionOutput.put("error",
+                                    "Attacked card is not of type 'Tank'.");
                             // add the action output to the final output
                             output.add(actionOutput);
                             break;
@@ -459,10 +518,12 @@ public final class Main {
                         heroAttacker.attack(heroAttacked);
                         if (heroAttacked.getHealth() <= 0) {
                             if (gameConfiguration.getPlayerTurn() == 1) {
-                                actionOutput.put("gameEnded", "Player one killed the enemy hero.");
+                                actionOutput.put("gameEnded",
+                                        "Player one killed the enemy hero.");
                                 playerOneWins++;
                             } else {
-                                actionOutput.put("gameEnded", "Player two killed the enemy hero.");
+                                actionOutput.put("gameEnded",
+                                        "Player two killed the enemy hero.");
                                 playerTwoWins++;
                             }
                             gamesPlayed++;
@@ -475,7 +536,8 @@ public final class Main {
                         if (currentPlayer.getMana() < currentPlayerHero.getMana()) {
                             actionOutput.put("command", "useHeroAbility");
                             actionOutput.put("affectedRow", affectedRow);
-                            actionOutput.put("error", "Not enough mana to use hero's ability.");
+                            actionOutput.put("error",
+                                    "Not enough mana to use hero's ability.");
                             // add the action output to the final output
                             output.add(actionOutput);
                             break;
@@ -484,25 +546,30 @@ public final class Main {
                         if (currentPlayerHero.hasAttacked()) {
                             actionOutput.put("command", "useHeroAbility");
                             actionOutput.put("affectedRow", affectedRow);
-                            actionOutput.put("error", "Hero has already attacked this turn.");
+                            actionOutput.put("error",
+                                    "Hero has already attacked this turn.");
                             // add the action output to the final output
                             output.add(actionOutput);
                             break;
                         }
                         // check if the attacked row belongs to whom it should
                         boolean rowBelongsToSelf = currentPlayer.hasRow(affectedRow);
-                        if (!rowBelongsToSelf && ((currentPlayerHero instanceof GeneralKocioraw) || (currentPlayerHero instanceof KingMudface))) {
+                        if (!rowBelongsToSelf && ((currentPlayerHero instanceof GeneralKocioraw)
+                                || (currentPlayerHero instanceof KingMudface))) {
                             actionOutput.put("command", "useHeroAbility");
                             actionOutput.put("affectedRow", affectedRow);
-                            actionOutput.put("error", "Selected row does not belong to the current player.");
+                            actionOutput.put("error",
+                                    "Selected row does not belong to the current player.");
                             // add the action output to the final output
                             output.add(actionOutput);
                             break;
                         }
-                        if (rowBelongsToSelf && ((currentPlayerHero instanceof LordRoyce) || (currentPlayerHero instanceof EmpressThorina))) {
+                        if (rowBelongsToSelf && ((currentPlayerHero instanceof LordRoyce)
+                                || (currentPlayerHero instanceof EmpressThorina))) {
                             actionOutput.put("command", "useHeroAbility");
                             actionOutput.put("affectedRow", affectedRow);
-                            actionOutput.put("error", "Selected row does not belong to the enemy.");
+                            actionOutput.put("error",
+                                    "Selected row does not belong to the enemy.");
                             // add the action output to the final output
                             output.add(actionOutput);
                             break;
@@ -529,6 +596,7 @@ public final class Main {
                         // add the action output to the final output
                         output.add(actionOutput);
                         break;
+                    default:
                 }
             }
         }

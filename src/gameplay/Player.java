@@ -61,7 +61,7 @@ public class Player {
      *
      * @param amount amount by which the mana is increased
      */
-    public void increaseManaBy(int amount) {
+    public void increaseManaBy(final int amount) {
         mana += amount;
     }
 
@@ -70,7 +70,7 @@ public class Player {
      *
      * @param amount amount by which the mana is decreased
      */
-    public void decreaseManaBy(int amount) {
+    public void decreaseManaBy(final int amount) {
         mana -= amount;
     }
 
@@ -88,13 +88,14 @@ public class Player {
      *
      * @param heroInput player hero input
      */
-    public void setHero(CardInput heroInput) {
-        switch (heroInput.getName()) {
-            case "Lord Royce" -> hero = new LordRoyce(heroInput);
-            case "Empress Thorina" -> hero = new EmpressThorina(heroInput);
-            case "King Mudface" -> hero = new KingMudface(heroInput);
-            case "General Kocioraw" -> hero = new GeneralKocioraw(heroInput);
-        }
+    public void setHero(final CardInput heroInput) {
+        hero = switch (heroInput.getName()) {
+            case "Lord Royce" -> new LordRoyce(heroInput);
+            case "Empress Thorina" -> new EmpressThorina(heroInput);
+            case "King Mudface" -> new KingMudface(heroInput);
+            case "General Kocioraw" -> new GeneralKocioraw(heroInput);
+            default -> null;
+        };
     }
 
     /**
@@ -111,7 +112,7 @@ public class Player {
      *
      * @param deckInput player deck input
      */
-    public void setDeck(ArrayList<CardInput> deckInput) {
+    public void setDeck(final ArrayList<CardInput> deckInput) {
         deck = new ArrayList<Card>();
         for (CardInput cardInput : deckInput) {
             // convert cards to their corresponding type
@@ -127,6 +128,7 @@ public class Player {
                 case "The Ripper" -> deck.add(new TheRipper(cardInput));
                 case "Disciple" -> deck.add(new Disciple(cardInput));
                 case "The Cursed One" -> deck.add(new TheCursedOne(cardInput));
+                default -> deck.add(null);
             }
         }
     }
@@ -136,7 +138,7 @@ public class Player {
      *
      * @param seed shuffle seed
      */
-    public void shuffleDeckWithSeed(int seed) {
+    public void shuffleDeckWithSeed(final int seed) {
         Collections.shuffle(deck, new Random(seed));
     }
 
@@ -180,7 +182,7 @@ public class Player {
      * @param board game board
      * @return 0 if successful, error code otherwise
      */
-    public int placeCard(int cardIdx, Board board) {
+    public int placeCard(final int cardIdx, final Board board) {
         // get the card from the player's hand
         Card card = cardsInHand.get(cardIdx);
         if (card.getMana() > mana) {
@@ -200,7 +202,7 @@ public class Player {
      *
      * @param board game board
      */
-    public void unfreezeCards(Board board) {
+    public void unfreezeCards(final Board board) {
         ArrayList<ArrayList<Card>> playerCards = board.getPlayerCardsOnBoard(playerIdx);
         for (ArrayList<Card> cardsOnRow : playerCards) {
             for (Card card : cardsOnRow) {
@@ -215,7 +217,7 @@ public class Player {
      * @param rowIdx index of checked row
      * @return `true` if the row corresponds to the player, `false` otherwise
      */
-    public boolean hasRow(int rowIdx) {
+    public boolean hasRow(final int rowIdx) {
         return switch (playerIdx) {
             case 1 -> (rowIdx == 2 || rowIdx == 3);
             case 2 -> (rowIdx == 0 || rowIdx == 1);
@@ -231,7 +233,7 @@ public class Player {
      * @param board game board
      * @return 0 if successful, error code otherwise
      */
-    public int useEnvironmentCard(Environment card, int rowIdx, Board board) {
+    public int useEnvironmentCard(final Environment card, final int rowIdx, final Board board) {
         if (card.getMana() > mana) {
             return 4; // NOT_ENOUGH_MANA_ENV error code
         }
@@ -255,7 +257,7 @@ public class Player {
      * @param board game board
      * @return `true` if the player has `Tank`s, `false` otherwise
      */
-    public boolean hasTanksOnBoard(Board board) {
+    public boolean hasTanksOnBoard(final Board board) {
         switch (playerIdx) {
             case 1:
                 ArrayList<Card> playerOneFrontCards = board.getCardsOnBoard().get(2);
@@ -284,24 +286,27 @@ public class Player {
      *
      * @param board game board
      */
-    public void resetAttackStateOfCards(Board board) {
+    public void resetAttackStateOfCards(final Board board) {
         switch (playerIdx) {
             case 1:
-                for (int rowIdx = 2; rowIdx <=3; rowIdx++) {
+                for (int rowIdx = 2; rowIdx <= 3; rowIdx++) {
                     for (Card card : board.getCardsOnBoard().get(rowIdx)) {
                         if (card instanceof Minion) {
                             ((Minion) card).resetAttackState();
                         }
                     }
                 }
+                break;
             case 2:
-                for (int rowIdx = 0; rowIdx <=1; rowIdx++) {
+                for (int rowIdx = 0; rowIdx <= 1; rowIdx++) {
                     for (Card card : board.getCardsOnBoard().get(rowIdx)) {
                         if (card instanceof Minion) {
                             ((Minion) card).resetAttackState();
                         }
                     }
                 }
+                break;
+            default:
         }
     }
 
